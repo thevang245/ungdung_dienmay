@@ -59,7 +59,7 @@ Widget build(BuildContext context) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (product['kieuhienthi'] == 'sanpham')
-                    Text('Giá: ${product['gia']}',
+                    Text('${formatCurrency(product['gia'])}₫',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, color: Colors.red)),
 

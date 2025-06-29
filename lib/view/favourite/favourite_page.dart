@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
+import 'package:flutter_application_1/view/until/until.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class favouritePage extends StatefulWidget {
@@ -26,8 +27,7 @@ class favouritePageState extends State<favouritePage>
 
   Future<void> reloadFavourites() async {
     final prefs = await SharedPreferences.getInstance();
-    String user = prefs.getString('userid') ?? '';
-    final key = 'favourite_items_$user';
+    final key = 'favourite_items_${Global.email}';
     final items = prefs.getStringList(key) ?? [];
 
     final List<Map<String, dynamic>> loadedItems = [];
@@ -92,13 +92,20 @@ class favouritePageState extends State<favouritePage>
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
                           children: [
-                            Image.network(
-                              item['hinhdaidien'],
-                              width: 80,
-                              height: 80,
+                            Container(
+                              padding: EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(12)),
+                                border: Border.all(width: 0.5,color: Colors.black12)
+                              ),
+                              child: Image.network(
+                              '${item['hinhdaidien']}',
+                              width: 60,
+                              height: 60,
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) =>
                                   const Icon(Icons.image, size: 60),
+                            ),
                             ),
                             Expanded(
                               child: Padding(
@@ -109,12 +116,15 @@ class favouritePageState extends State<favouritePage>
                                     Text(
                                       '${item['tieude']}',
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      
                                       ),
+                                      maxLines: 2,
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${item['gia']} VNĐ',
+                                      '${formatCurrency(item['gia'])}₫',
                                       style: const TextStyle(
                                         color: Colors.red,
                                         fontSize: 15,

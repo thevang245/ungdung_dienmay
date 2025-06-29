@@ -223,7 +223,7 @@ class _HistoryCardState extends State<HistoryCard> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '${formatCurrency(item.price)}đ',
+                                    '${formatCurrency(item.price)}₫',
                                     style: const TextStyle(
                                         color: Colors.red, fontSize: 14),
                                   ),
@@ -251,7 +251,7 @@ class _HistoryCardState extends State<HistoryCard> {
                 children: [
                   Spacer(),
                   Text(
-                    'Tổng: ${formatCurrency(widget.totalPrice)}đ',
+                    'Tổng: ${formatCurrency(widget.totalPrice)}₫',
                     style: const TextStyle(
                         color: Colors.red, fontWeight: FontWeight.w600),
                   ),

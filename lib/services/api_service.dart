@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class APIService {
-  static const String baseUrl = 'https://9b66-2405-4802-c2f1-1960-396d-6dbd-6919-3ed9.ngrok-free.app';
+  static const String baseUrl = 'https://703f-2405-4802-c2f1-1960-396d-6dbd-6919-3ed9.ngrok-free.app';
   static const String loginUrl = '$baseUrl/api/login.php';
 
   static Future<Map<String, dynamic>> fetchProductsByCategory({

@@ -1,6 +1,7 @@
 // lib/widgets/related_product_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/view/until/until.dart';
 
 class RelatedProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
@@ -75,7 +76,7 @@ class RelatedProductCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       if (hasPrice)
                         Text(
-                          price.toString(),
+                          '${formatCurrency(price)}₫',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,

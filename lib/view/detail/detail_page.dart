@@ -427,7 +427,7 @@ class DetailPageState extends State<DetailPage> {
                             tieude: product['tieude'],
                             gia: product['gia'],
                             hinhdaidien:
-                                'https://choixanh.com.vn/${product['hinhdaidien']}',
+                                '${product['hinhdaidien']}',
                           );
                         },
                       ),

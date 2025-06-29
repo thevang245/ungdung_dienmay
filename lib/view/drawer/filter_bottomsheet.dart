@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/view/home/homepage.dart';
 import '../../services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -86,7 +87,7 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
 
   Future<void> loadSavedFilters() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('savedFilters');
+    final saved = prefs.getString('savedFilters_${Global.email}');
 
     if (saved != null) {
       try {
@@ -213,8 +214,6 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
                                             return Stack(
                                               children: [
                                                 FilterChip(
-                                                  key: ValueKey(
-                                                      'filter_${groupKey}_$childId'),
                                                   label: Text(
                                                     childTitle,
                                                     style: TextStyle(
@@ -238,16 +237,21 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
                                                                     groupKey] ??
                                                                 [];
 
-                                                        if (selected) {
-                                                          if (!currentList
-                                                              .contains(
-                                                                  childId)) {
-                                                            selectedFilters[
-                                                                groupKey] = [
-                                                              ...currentList,
-                                                              childId
-                                                            ];
-                                                          }
+                                                        if (childId != null) {
+                                                          setState(() {
+                                                            if (selected) {
+                                                              // Chỉ chọn 1 item duy nhất trong nhóm
+                                                              selectedFilters[
+                                                                  groupKey] = [
+                                                                childId
+                                                              ];
+                                                            } else {
+                                                              // Nếu bỏ chọn, xoá luôn nhóm nếu trống
+                                                              selectedFilters
+                                                                  .remove(
+                                                                      groupKey);
+                                                            }
+                                                          });
                                                         } else {
                                                           final updatedList =
                                                               List<int>.from(
@@ -296,14 +300,20 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  final idFilterString = selectedFilters.entries
-                      .map((e) => '${e.key}:${e.value.join(',')}')
-                      .join('|');
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString(
-                      'savedFilters', jsonEncode(selectedFilters));
+                  String? idFilterString;
 
-                  widget.onFilterSelected(idFilterString);
+                  if (selectedFilters.isNotEmpty) {
+                    final allSelectedIds =
+                        selectedFilters.values.expand((ids) => ids).toList();
+                    idFilterString = allSelectedIds.join(',');
+                  } else {
+                    idFilterString = null;
+                  }
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('savedFilters_${Global.email}',
+                      jsonEncode(selectedFilters));
+
+                  widget.onFilterSelected(idFilterString ?? '');
                   Navigator.of(context).pop();
                 },
                 icon: const Icon(Icons.check_circle, size: 20),

@@ -44,7 +44,7 @@ class HomePageState extends State<HomePage> {
   String selectedFilterString = '';
 
   late VoidCallback _listener;
- 
+
   final ValueNotifier<int> filterNotifier = ValueNotifier(0);
   late Map<String, dynamic> danhMucData;
 
@@ -53,16 +53,18 @@ class HomePageState extends State<HomePage> {
     super.initState();
     _categoryId = widget.categoryNotifier.value;
 
-    _listener = () {
+    _listener = () async {
       if (!mounted) return;
       setState(() {
         _categoryId = widget.categoryNotifier.value;
+        selectedFilterString = '';
         isLoading = true;
       });
+      final prefs = await SharedPreferences.getInstance();
+      prefs.remove('savedFilters_${Global.email}');
       fetchProducts();
     };
 
-    
     widget.categoryNotifier.addListener(_listener);
 
     loadLoginStatus();
@@ -212,7 +214,6 @@ class HomePageState extends State<HomePage> {
         setState(() => isLoading = false);
       }
     }
-    selectedFilterString = '';
   }
 
   String findCategoryNameById(Map<String, dynamic> data, int id,

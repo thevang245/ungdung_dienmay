@@ -235,9 +235,9 @@ class _PageAllState extends State<PageAll> {
     switch (_currentPage) {
       case 'home':
         return 0;
-      case 'cart':
-        return 1;
       case 'favourite':
+        return 1;
+      case 'cart':
         return 2;
       case 'register':
         return 3;
@@ -264,12 +264,12 @@ class _PageAllState extends State<PageAll> {
           _currentPage = 'home';
           break;
         case 1:
-          _currentPage = 'cart';
-          cartPageKey.currentState?.loadCartItems();
-          break;
-        case 2:
           _currentPage = 'favourite';
           favouritePageKey.currentState?.reloadFavourites();
+          break;
+        case 2:
+          _currentPage = 'cart';
+          cartPageKey.currentState?.loadCartItems();
           break;
         case 3:
           _currentPage = 'profile';
@@ -310,8 +310,8 @@ class _PageAllState extends State<PageAll> {
                 index: _getPageIndex(),
                 children: [
                   _homePage,
-                  _cartPage,
                   _favouritePage,
+                  _cartPage,
                   _registerPage,
                   _profilePage,
                   _detailPage ?? Container(), // tránh null & tránh render lại

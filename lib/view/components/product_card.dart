@@ -67,7 +67,7 @@ class ProductCard extends StatelessWidget {
               const SizedBox(height: 8),
               if (categoryId != 35004 &&
                   (product['gia']?.toString().trim().isNotEmpty ?? false))
-                Text('${formatCurrency(product['gia'])}đ',
+                Text('${formatCurrency(product['gia'])}₫',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.red)),
               if (product['tieude']?.toString().trim().isNotEmpty ?? false)

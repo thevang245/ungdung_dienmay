@@ -236,15 +236,15 @@ class PageCartState extends State<PageCart> {
                                                       calculateTotalPrice(
                                                               cartItems)
                                                           .toStringAsFixed(0)) +
-                                                  "đ"),
+                                                  "₫"),
                                           const SizedBox(height: 8),
                                           buildInfoRow("Phí vận chuyển",
-                                              '${formatCurrency(phiVanChuyen)}đ'),
+                                              '${formatCurrency(phiVanChuyen)}₫'),
                                           const Divider(
                                               height: 20,
                                               color: Colors.black12),
                                           buildInfoRow("Tổng thanh toán",
-                                              '${formatCurrency(tongThanhToan)}đ',
+                                              '${formatCurrency(tongThanhToan)}₫',
                                               isTotal: true),
                                         ]
                                       ],
