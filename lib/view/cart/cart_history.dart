@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CarthistoryPage extends StatefulWidget {
   final Function(dynamic product) onProductTap;
-  final void Function(int?) gotoCart;
+  final void Function(List<int>? productIds) gotoCart;
   final ValueNotifier<int> cartitemCount;
 
   const CarthistoryPage({
@@ -190,7 +190,7 @@ class CarthistoryPageState extends State<CarthistoryPage>
           Container(
             color: Colors.black.withOpacity(0.5),
             child: const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(color: Color(0xff0066FF),),
             ),
           ),
       ],
@@ -241,15 +241,15 @@ class CarthistoryPageState extends State<CarthistoryPage>
                         break;
                       }
 
-                      productIds.add(productId); 
+                      productIds.add(productId);
                     }
 
                     _stopLoading();
 
                     if (success) {
-                      widget.gotoCart(items.isNotEmpty
-                          ? int.tryParse(items.first.id)
-                          : null);
+                      widget.gotoCart(
+                        productIds.isNotEmpty ? productIds : null,
+                      );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

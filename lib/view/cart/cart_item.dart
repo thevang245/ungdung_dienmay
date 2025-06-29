@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
+import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 
 class ItemCart extends StatefulWidget {
@@ -41,12 +42,25 @@ class _ItemCartState extends State<ItemCart> {
     setState(() {
       widget.item.quantity = newQuantity;
     });
+
     if (widget.OnChanged != null) widget.OnChanged!();
+
+    final total = await APICartService.getCartItemCountFromApi(Global.email);
+
+    if (widget.cartitemCount.value != total) {
+      widget.cartitemCount.value = total;
+    } else {
+      // Ép rebuild nếu giá trị không đổi
+      widget.cartitemCount.value++;
+      widget.cartitemCount.value = total;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return InkWell(
+      onTap: widget.onTap,
+      child: Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: Material(
         elevation: 0,
@@ -107,8 +121,8 @@ class _ItemCartState extends State<ItemCart> {
                           height: 26,
                           width: 90,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.black12),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -119,17 +133,17 @@ class _ItemCartState extends State<ItemCart> {
                                     _updateQuantity(widget.item.quantity - 1);
                                   }
                                 },
-                                child: const Icon(Icons.remove, size: 16),
+                                child: const Icon(Icons.remove, size: 20,color: Colors.black54,),
                               ),
                               Text(
                                 '${widget.item.quantity}',
-                                style: const TextStyle(fontSize: 13),
+                                style: const TextStyle(fontSize: 14),
                               ),
                               InkWell(
                                 onTap: () {
                                   _updateQuantity(widget.item.quantity + 1);
                                 },
-                                child: const Icon(Icons.add, size: 16),
+                                child: const Icon(Icons.add, size: 20, color: Colors.black54,),
                               ),
                             ],
                           ),
@@ -167,6 +181,7 @@ class _ItemCartState extends State<ItemCart> {
           ),
         ),
       ),
+    )
     );
   }
 }

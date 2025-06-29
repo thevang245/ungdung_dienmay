@@ -54,96 +54,102 @@ class _OrderConfirmationSheetState extends State<OrderConfirmationSheet> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return AnimatedPadding(
-    padding: EdgeInsets.only(
-      bottom: MediaQuery.of(context).viewInsets.bottom,
-    ),
-    duration: const Duration(milliseconds: 300),
-    curve: Curves.easeOut,
-    child: Material(
-      color: Colors.white,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Xác nhận đặt hàng',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            CustomTextField(
-              focusNode: _fullNameFocus,
-              nextFocusNode: _addressFocus,
-              label: 'Họ và tên',
-              controller: widget.fullnameController,
-              icon: Icons.person,
-            ),
-            const SizedBox(height: 12),
-            CustomTextField(
-              focusNode: _addressFocus,
-              nextFocusNode: _phoneFocus,
-              label: 'Địa chỉ nhận hàng',
-              controller: widget.addressController,
-              icon: Icons.location_on,
-            ),
-            const SizedBox(height: 12),
-            CustomTextField(
-              focusNode: _phoneFocus,
-              nextFocusNode: _emailFocus,
-              label: 'Số điện thoại',
-              controller: widget.phoneController,
-              icon: Icons.phone,
-            ),
-            const SizedBox(height: 12),
-            CustomTextField(
-              focusNode: _emailFocus,
-              label: 'Email',
-              controller: widget.emailController,
-              icon: Icons.email,
-              readOnly: true,
-              enable: false,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Colors.grey[300],
-                    ),
-                    child: const Text(
-                      'Hủy',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 30),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _handleConfirm,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Color(0xff0066FF),
-                    ),
-                    child: const Text(
-                      'Xác nhận',
-                      style: TextStyle(color: Colors.white),
+  Widget build(BuildContext context) {
+    return AnimatedPadding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      child: Material(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Xác nhận đặt hàng',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                focusNode: _fullNameFocus,
+                nextFocusNode: _addressFocus,
+                label: 'Họ và tên',
+                controller: widget.fullnameController,
+                icon: Icons.person,
+              ),
+              const SizedBox(height: 12),
+              CustomTextField(
+                focusNode: _addressFocus,
+                nextFocusNode: _phoneFocus,
+                label: 'Địa chỉ nhận hàng',
+                controller: widget.addressController,
+                icon: Icons.location_on,
+              ),
+              const SizedBox(height: 12),
+              CustomTextField(
+                focusNode: _phoneFocus,
+                nextFocusNode: _emailFocus,
+                label: 'Số điện thoại',
+                controller: widget.phoneController,
+                icon: Icons.phone,
+              ),
+              const SizedBox(height: 12),
+              CustomTextField(
+                focusNode: _emailFocus,
+                label: 'Email',
+                controller: widget.emailController,
+                icon: Icons.email,
+                readOnly: false,
+                enable: false,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadiusGeometry.circular(12),
+                            side:
+                                BorderSide(width: 0.5, color: Colors.black38)),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: const Text(
+                        'Hủy',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                   ),
-                )
-              ],
-            ),
-          ],
+                  const SizedBox(width: 30),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _handleConfirm,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadiusGeometry.circular(12)),
+                        backgroundColor: Color(0xff0066FF),
+                      ),
+                      child: const Text(
+                        'Xác nhận',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

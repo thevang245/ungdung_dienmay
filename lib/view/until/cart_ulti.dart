@@ -16,39 +16,38 @@ double calculateTotalPrice(List<CartItemModel> cartItems) {
   return total;
 }
 
-Future<void> handleDatHang({
-  required BuildContext context,
-  required String userId,
-  required String customerName,
-  required String email,
-  required String tel,
-  required String address,
-  required double totalPrice,
-  String note = '',
-  required List<CartItemModel> cartItems,
-  required Future<void> Function() onCartReload,
-  required ValueNotifier<int> cartitemCount,
-  required String moduletype
-}) async {
+Future<void> handleDatHang(
+    {required BuildContext context,
+    required String userId,
+    required String customerName,
+    required String email,
+    required String tel,
+    required String address,
+    required double totalPrice,
+    String note = '',
+    required List<CartItemModel> cartItems,
+    required Future<void> Function() onCartReload,
+    required ValueNotifier<int> cartitemCount,
+    required String moduletype}) async {
   try {
     final selectedItems = cartItems.where((item) => item.isSelect).toList();
 
     if (selectedItems.isEmpty) {
-      showToast('Vui lòng chọn ít nhất 1 sản phẩm để đặt hàng', backgroundColor: Colors.orange);
+      showToast('Vui lòng chọn ít nhất 1 sản phẩm để đặt hàng',
+          backgroundColor: Colors.orange);
       return;
     }
 
     // Gọi API đặt hàng với danh sách sản phẩm
     await APICartService.datHang(
-      customerName: customerName,
-      email: email,
-      tel: tel,
-      address: address,
-      note: note,
-      totalPrice: totalPrice,
-      items: selectedItems,
-      moduletype: moduletype
-    );
+        customerName: customerName,
+        email: email,
+        tel: tel,
+        address: address,
+        note: note,
+        totalPrice: totalPrice,
+        items: selectedItems,
+        moduletype: moduletype);
 
     // Xoá từng item khỏi giỏ
     for (var item in selectedItems) {
@@ -58,6 +57,8 @@ Future<void> handleDatHang({
         productId: item.id.toString(),
       );
     }
+    final total = await APICartService.getCartItemCountFromApi(Global.email);
+    cartitemCount.value = total;
 
     await onCartReload();
     Navigator.pop(context);

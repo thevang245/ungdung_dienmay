@@ -84,15 +84,15 @@ class PageCartState extends State<PageCart> {
     }
   }
 
-  Future<void> chonVaMoBottomSheet(int? productIdVuaThem) async {
+  Future<void> chonNhieuVaMoBottomSheet(List<int> productIdsVuaThem) async {
     await loadCartItems();
     await Future.delayed(Duration(milliseconds: 100));
 
-    if (productIdVuaThem != null) {
+    if (productIdsVuaThem.isNotEmpty) {
       setState(() {
         for (var item in cartItems) {
-          item.isSelect =
-              (int.tryParse(item.id.toString()) == productIdVuaThem);
+          int? itemId = int.tryParse(item.id.toString());
+          item.isSelect = itemId != null && productIdsVuaThem.contains(itemId);
         }
         isSelectAll = cartItems.every((item) => item.isSelect);
       });
@@ -106,66 +106,67 @@ class PageCartState extends State<PageCart> {
             ),
             builder: (BuildContext context) {
               return OrderConfirmationSheet(
-                  parentContext: context,
-                  addressController: addressController,
-                  fullnameController: fullnameController,
-                  phoneController: phoneController,
-                  emailController: emailController,
-                  tongThanhToan: tongThanhToan,
-                  onConfirm: () async {
-                    await showDialog(
-                      context: rootContext,
-                      barrierDismissible: false,
-                      builder: (dialogContext) {
-                        // Gọi xử lý đơn hàng sau khi dialog đã render
-                        Future.delayed(Duration.zero, () async {
-                          await handleDatHang(
-                            moduletype: cartItems
-                                .firstWhere((item) => item.isSelect)
-                                .moduleType,
-                            totalPrice: tongThanhToan,
-                            address: addressController.text,
-                            cartitemCount: widget.cartitemCount,
-                            context: context,
-                            userId: Global.email,
-                            customerName: fullnameController.text,
-                            email: emailController.text,
-                            tel: phoneController.text,
-                            cartItems: cartItems,
-                            onCartReload: loadCartItems,
-                          );
-
-                          if (mounted) {
-                            Navigator.of(dialogContext, rootNavigator: true)
-                                .pop(); // tắt dialog
-                          }
-                        });
-
-                        return const Dialog(
-                          backgroundColor: Colors.black87,
-                          insetPadding: EdgeInsets.all(80),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CircularProgressIndicator(
-                                    color: Color(0xff0066FF)),
-                                SizedBox(height: 16),
-                                Text(
-                                  "Đang xử lý đơn hàng...",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
+                parentContext: context,
+                addressController: addressController,
+                fullnameController: fullnameController,
+                phoneController: phoneController,
+                emailController: emailController,
+                tongThanhToan: tongThanhToan,
+                onConfirm: () async {
+                  await showDialog(
+                    context: rootContext,
+                    barrierDismissible: false,
+                    builder: (dialogContext) {
+                      // Gọi xử lý đơn hàng sau khi dialog đã render
+                      Future.delayed(Duration.zero, () async {
+                        await handleDatHang(
+                          moduletype: cartItems
+                              .firstWhere((item) => item.isSelect)
+                              .moduleType,
+                          totalPrice: tongThanhToan,
+                          address: addressController.text,
+                          cartitemCount: widget.cartitemCount,
+                          context: context,
+                          userId: Global.email,
+                          customerName: fullnameController.text,
+                          email: emailController.text,
+                          tel: phoneController.text,
+                          cartItems: cartItems,
+                          onCartReload: loadCartItems,
                         );
-                      },
-                    );
-                  });
+
+                        if (mounted) {
+                          Navigator.of(dialogContext, rootNavigator: true)
+                              .pop();
+                        }
+                      });
+
+                      return const Dialog(
+                        backgroundColor: Colors.black87,
+                        insetPadding: EdgeInsets.all(80),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                  color: Color(0xff0066FF)),
+                              SizedBox(height: 16),
+                              Text(
+                                "Đang xử lý đơn hàng...",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
             },
           );
         }

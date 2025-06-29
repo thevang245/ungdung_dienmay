@@ -44,47 +44,98 @@ class _HistoryCardState extends State<HistoryCard> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return Dialog(
+          backgroundColor: Colors.white,
+          elevation: 4, // Thêm đổ bóng nhẹ
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
-          title: Row(
-            children: [
-              Icon(Icons.warning_amber_rounded,
-                  color: Colors.amber[600], size: 30),
-              const SizedBox(width: 12),
-              const Text(
-                'Xác nhận hủy đơn',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          content: const Text('Bạn có chắc chắn muốn hủy đơn hàng này không?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Không'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop(); 
-                widget.startLoading();
-                final success =
-                    await widget.onReorder(items); 
-                widget.stopLoading();
-
-                if (!success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Hủy đơn không thành công.'),
-                      backgroundColor: Colors.redAccent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors
+                      .amber.shade700, // Thay đỏ bằng vàng để tạo điểm nhấn
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Bạn chắc chắn muốn hủy đơn?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Roboto', // Font hiện đại
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Sau khi hủy, đơn hàng này sẽ không thể khôi phục.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text(
+                          'Không',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
                     ),
-                  );
-                }
-              },
-              child: const Text('Hủy đơn'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          widget.startLoading();
+                          final success = await widget.onReorder(items);
+                          widget.stopLoading();
+
+                          if (!success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content:
+                                    const Text('Hủy đơn không thành công.'),
+                                backgroundColor:
+                                    Colors.red, // Đồng nhất màu
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shadowColor: Colors.black26, // Thêm đổ bóng
+                          elevation: 2,
+                        ),
+                        child: const Text(
+                          'Hủy đơn',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -216,10 +267,10 @@ class _HistoryCardState extends State<HistoryCard> {
                             backgroundColor: const Color(0xff0066FF),
                             minimumSize: const Size(70, 28),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 28, vertical: 6),
+                                horizontal: 28, vertical: 8),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(10),
                               side: const BorderSide(
                                   color: Color(0xff0055dd), width: 0.5),
                             ),
@@ -227,7 +278,7 @@ class _HistoryCardState extends State<HistoryCard> {
                           child: const Text(
                             'Mua lại',
                             style: TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w500),
+                                fontSize: 14, fontWeight: FontWeight.w500),
                           ),
                         )
                       : TextButton(
@@ -237,10 +288,10 @@ class _HistoryCardState extends State<HistoryCard> {
                             backgroundColor: Colors.white,
                             minimumSize: const Size(70, 28),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 28, vertical: 6),
+                                horizontal: 24, vertical: 8),
                             foregroundColor: Colors.black87,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(10),
                               side: const BorderSide(
                                   color: Colors.black38, width: 0.5),
                             ),
@@ -248,7 +299,7 @@ class _HistoryCardState extends State<HistoryCard> {
                           child: const Text(
                             'Hủy đơn hàng',
                             style: TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w500),
+                                fontSize: 13.5, fontWeight: FontWeight.w500),
                           ),
                         ),
                 ],

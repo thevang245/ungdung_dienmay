@@ -8,8 +8,8 @@ class CustomTextField extends StatefulWidget {
   final int? maxline;
   final bool readOnly;
   final bool enable;
-  final FocusNode? focusNode; // 👈 Focus hiện tại
-  final FocusNode? nextFocusNode; // 👈 Focus kế tiếp
+  final FocusNode? focusNode;
+  final FocusNode? nextFocusNode;
 
   const CustomTextField({
     Key? key,
@@ -92,6 +92,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: Colors.blue, width: 3),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 15),

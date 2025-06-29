@@ -263,16 +263,19 @@ class APICartService {
     }
   }
 
-  static Future<int> getCartItemCountByUserId({
-    required String userId,
-  }) async {
-    final items = await fetchCartItemsById(emailAddress: userId);
+  static Future<int> getCartItemCountFromApi(String email) async {
+    final response = await http.post(
+      Uri.parse('${APIService.baseUrl}/api/get.total.quantity.php'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email}),
+    );
 
-    int totalQuantity = 0;
-    for (final item in items) {
-      totalQuantity += item.quantity;
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print('dữ liệu tổng số lượng: $data');
+      return int.tryParse(data['totalQuantity'].toString()) ?? 0;
+    } else {
+      throw Exception('Không thể lấy số lượng sản phẩm trong giỏ');
     }
-
-    return totalQuantity;
   }
 }

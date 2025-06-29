@@ -77,6 +77,7 @@ class _PageAllState extends State<PageAll> {
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      print("Đang gọi hàm lấy số lượng giỏ hàng...");
       if (Global.email.isEmpty) {
         final prefs = await SharedPreferences.getInstance();
         Global.email = prefs.getString('emailAddress') ?? '';
@@ -84,9 +85,7 @@ class _PageAllState extends State<PageAll> {
       }
 
       if (Global.email.isNotEmpty) {
-        int count = await APICartService.getCartItemCountByUserId(
-          userId: Global.email,
-        );
+        int count = await APICartService.getCartItemCountFromApi(Global.email);
         cartItemCountNotifier.value = count;
       } else {
         print("Không tìm thấy userId");
@@ -113,12 +112,13 @@ class _PageAllState extends State<PageAll> {
     );
 
     _carthistoryPage = CarthistoryPage(
-      gotoCart: (int? productidVuathem) {
+      gotoCart: (List<int>? productIdsVuaThem) {
         setState(() {
           _currentPage = 'cart';
           _currentIndex = 2;
         });
-        cartPageKey.currentState?.chonVaMoBottomSheet(productidVuathem);
+        cartPageKey.currentState
+            ?.chonNhieuVaMoBottomSheet(productIdsVuaThem ?? []);
       },
       cartitemCount: cartItemCountNotifier,
       onProductTap: (product) {
@@ -196,7 +196,9 @@ class _PageAllState extends State<PageAll> {
                 _currentPage = 'cart';
                 _currentIndex = 2;
               });
-              cartPageKey.currentState?.chonVaMoBottomSheet(productIdVuaThem);
+              if (productIdVuaThem != null)
+                cartPageKey.currentState
+                    ?.chonNhieuVaMoBottomSheet([productIdVuaThem]);
             },
             modelType: product is CartItemModel
                 ? product.moduleType
@@ -262,12 +264,12 @@ class _PageAllState extends State<PageAll> {
           _currentPage = 'home';
           break;
         case 1:
-          _currentPage = 'favourite';
-          favouritePageKey.currentState?.reloadFavourites();
-          break;
-        case 2:
           _currentPage = 'cart';
           cartPageKey.currentState?.loadCartItems();
+          break;
+        case 2:
+          _currentPage = 'favourite';
+          favouritePageKey.currentState?.reloadFavourites();
           break;
         case 3:
           _currentPage = 'profile';

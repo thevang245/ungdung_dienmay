@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter/material.dart';
-import '../../services/api_service.dart'; // chỉnh đúng path nếu cần
+import '../../services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BoLocBottomSheet extends StatefulWidget {
-  final void Function(int) onFilterSelected;
+  final void Function(String) onFilterSelected;
   final ValueNotifier<int?> filterNotifier;
   final String idCatalog;
 
@@ -23,7 +26,7 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
   List<Map<String, dynamic>> filtersWithChildren = [];
   bool isLoading = true;
   String? errorMessage;
-  Set<int> selectedIds = {};
+  Map<String, List<int>> selectedFilters = {};
 
   @override
   void initState() {
@@ -61,7 +64,7 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
 
         setState(() {
           filtersWithChildren = newFilters;
-          selectedIds.clear();
+          selectedFilters.clear();
           isLoading = false;
         });
       } else {
@@ -76,6 +79,32 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
         errorMessage = 'Error loading filters: $e';
         isLoading = false;
       });
+    }
+
+    await loadSavedFilters();
+  }
+
+  Future<void> loadSavedFilters() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString('savedFilters');
+
+    if (saved != null) {
+      try {
+        final Map<String, dynamic> decoded = jsonDecode(saved);
+        final Map<String, List<int>> restored = {};
+
+        decoded.forEach((key, value) {
+          restored[key] = List<int>.from(value);
+        });
+
+        if (mounted) {
+          setState(() {
+            selectedFilters = restored;
+          });
+        }
+      } catch (e) {
+        print("❌ Lỗi khi parse savedFilters: $e");
+      }
     }
   }
 
@@ -157,9 +186,9 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
                                         Text(
                                           title,
                                           style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87),
                                         ),
                                         const SizedBox(height: 8),
                                         Wrap(
@@ -173,13 +202,19 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
                                             final int? childId = int.tryParse(
                                                 child['idfilter']?.toString() ??
                                                     '');
-                                            final bool isSelected = childId !=
-                                                    null &&
-                                                selectedIds.contains(childId);
+                                            final groupKey = title
+                                                .toLowerCase()
+                                                .replaceAll(' ', '');
+                                            final bool isSelected =
+                                                selectedFilters[groupKey]
+                                                        ?.contains(childId) ??
+                                                    false;
 
                                             return Stack(
                                               children: [
                                                 FilterChip(
+                                                  key: ValueKey(
+                                                      'filter_${groupKey}_$childId'),
                                                   label: Text(
                                                     childTitle,
                                                     style: TextStyle(
@@ -198,12 +233,37 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
                                                   onSelected: (selected) {
                                                     if (childId != null) {
                                                       setState(() {
+                                                        final currentList =
+                                                            selectedFilters[
+                                                                    groupKey] ??
+                                                                [];
+
                                                         if (selected) {
-                                                          selectedIds
-                                                              .add(childId);
+                                                          if (!currentList
+                                                              .contains(
+                                                                  childId)) {
+                                                            selectedFilters[
+                                                                groupKey] = [
+                                                              ...currentList,
+                                                              childId
+                                                            ];
+                                                          }
                                                         } else {
-                                                          selectedIds
-                                                              .remove(childId);
+                                                          final updatedList =
+                                                              List<int>.from(
+                                                                  currentList)
+                                                                ..remove(
+                                                                    childId);
+                                                          if (updatedList
+                                                              .isEmpty) {
+                                                            selectedFilters
+                                                                .remove(
+                                                                    groupKey);
+                                                          } else {
+                                                            selectedFilters[
+                                                                    groupKey] =
+                                                                updatedList;
+                                                          }
                                                         }
                                                       });
                                                     }
@@ -235,7 +295,15 @@ class _BoLocBottomSheetState extends State<BoLocBottomSheet> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
+                  final idFilterString = selectedFilters.entries
+                      .map((e) => '${e.key}:${e.value.join(',')}')
+                      .join('|');
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString(
+                      'savedFilters', jsonEncode(selectedFilters));
+
+                  widget.onFilterSelected(idFilterString);
                   Navigator.of(context).pop();
                 },
                 icon: const Icon(Icons.check_circle, size: 20),

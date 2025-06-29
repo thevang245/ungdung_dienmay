@@ -41,9 +41,10 @@ class HomePageState extends State<HomePage> {
   List<int> dynamicCategoryIds = [];
   String categoryName = '';
   String IdCatalogInitial = '';
+  String selectedFilterString = '';
 
   late VoidCallback _listener;
-  late VoidCallback _filterListener;
+ 
   final ValueNotifier<int> filterNotifier = ValueNotifier(0);
   late Map<String, dynamic> danhMucData;
 
@@ -61,14 +62,7 @@ class HomePageState extends State<HomePage> {
       fetchProducts();
     };
 
-    _filterListener = () {
-      if (!mounted) return;
-      final filterValue = widget.filterNotifier.value;
-      if (filterValue == null) return;
-      fetchFilteredProductsAndUpdateUI();
-    };
-
-    widget.filterNotifier.addListener(_filterListener);
+    
     widget.categoryNotifier.addListener(_listener);
 
     loadLoginStatus();
@@ -78,7 +72,6 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     widget.categoryNotifier.removeListener(_listener);
-    widget.filterNotifier.removeListener(_filterListener);
     super.dispose();
   }
 
@@ -137,11 +130,11 @@ class HomePageState extends State<HomePage> {
 
           final Map<String, dynamic> response =
               await APIService.fetchProductsByCategory(
-            ww2: modules[0],
-            product: modules[1],
-            extention: modules[2],
-            categoryId: id,
-          );
+                  ww2: modules[0],
+                  product: modules[1],
+                  extention: modules[2],
+                  categoryId: id,
+                  idfilter: '0');
 
           final String categoryTitle =
               response['tieude'] ?? 'Không rõ tên danh mục';
@@ -181,6 +174,7 @@ class HomePageState extends State<HomePage> {
           product: modules[1],
           extention: modules[2],
           categoryId: _categoryId,
+          idfilter: selectedFilterString,
         );
 
         final String categoryTitle =
@@ -218,22 +212,7 @@ class HomePageState extends State<HomePage> {
         setState(() => isLoading = false);
       }
     }
-  }
-
-  Future<void> fetchFilteredProductsAndUpdateUI() async {
-    setState(() {
-      isLoading = true;
-      products = [];
-    });
-
-    // final filtered = await APIService.fetchFilteredProducts();
-
-    if (!mounted) return;
-
-    setState(() {
-      products = [];
-      isLoading = false;
-    });
+    selectedFilterString = '';
   }
 
   String findCategoryNameById(Map<String, dynamic> data, int id,
@@ -514,7 +493,7 @@ class HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      appBar: (_categoryId != 0 && products.isNotEmpty && _categoryId != 35001)
+      appBar: (_categoryId != 0 && _categoryId != 35001)
           ? AppBar(
               backgroundColor: Colors.white,
               titleSpacing: 8,
@@ -558,7 +537,13 @@ class HomePageState extends State<HomePage> {
                           builder: (_) => BoLocBottomSheet(
                             idCatalog: IdCatalogInitial,
                             filterNotifier: filterNotifier,
-                            onFilterSelected: (int filterId) {},
+                            onFilterSelected: (String idfilter) {
+                              setState(() {
+                                selectedFilterString = idfilter;
+                                isLoading = true;
+                              });
+                              fetchProducts();
+                            },
                           ),
                         );
                       },
@@ -618,7 +603,6 @@ Map<String, dynamic> processCategoryData(List<dynamic> categories) {
   final List<Map<String, dynamic>> safeList =
       categories.map((item) => Map<String, dynamic>.from(item)).toList();
 
-  // Tiếp tục xử lý như cũ với safeList
   List<int> getParentCategoryIds(List<Map<String, dynamic>> items) {
     return items.map((e) => int.parse(e['id'].toString())).toList();
   }
