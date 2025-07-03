@@ -26,10 +26,8 @@ class _RegisterState extends State<Register> {
   final _fullnameFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
-  Future<bool> registerUser({
-    required String name, 
-    required String email,
-    required String password,
+  Future<bool> _register({
+    required String name, required String email, required String password
   }) async {
     try {
       final Uri url = Uri.parse(
@@ -43,7 +41,6 @@ class _RegisterState extends State<Register> {
           'password': password,
         },
       );
-
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
 
@@ -76,7 +73,7 @@ class _RegisterState extends State<Register> {
       return;
     }
 
-    bool isSuccess = await registerUser(
+    bool isSuccess = await _register(
       name: fullname,
       email: email,
       password: password,

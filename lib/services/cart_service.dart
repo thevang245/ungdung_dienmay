@@ -181,23 +181,15 @@ class APICartService {
   }
 
   static Future<void> datHang({
-    required String moduletype,
-    required String customerName,
-    required String email,
-    required String tel,
-    required String address,
-    String note = '',
-    required double totalPrice,
-    required List<CartItemModel> items, // <-- NEW
+    required String moduletype, required String customerName,
+    required String email, required String tel,
+    required String address, required double totalPrice,
+    required List<CartItemModel> items,
   }) async {
     final url = Uri.parse('${APIService.baseUrl}/api/order.php');
-
     final body = {
-      'customer_name': customerName,
-      'email': email,
-      'tel': tel,
-      'address': address,
-      'note': note,
+      'customer_name': customerName, 'email': email,
+      'tel': tel, 'address': address,
       'total_price': totalPrice.toString(),
       'items': items
           .map((item) => {
@@ -208,7 +200,6 @@ class APICartService {
               })
           .toList(),
     };
-
     final response = await http.post(
       url,
       headers: {
@@ -217,7 +208,6 @@ class APICartService {
       },
       body: json.encode(body),
     );
-
     if (response.statusCode == 201 || response.statusCode == 200) {
       print('Đặt hàng thành công!');
     } else {

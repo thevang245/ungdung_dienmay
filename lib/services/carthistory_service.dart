@@ -21,11 +21,12 @@ class APICarthistoryService {
         final List<dynamic> orders = data['orders'];
         return orders.map((e) => OrderModel.fromJson(e)).toList();
       } else {
-        throw Exception('Lỗi: ${response.body}');
+        print('Lỗi phản hồi: ${response.body}');
+        return [];
       }
     } catch (e) {
       print('Lỗi khi lấy lịch sử: $e');
-      rethrow;
+      return [];
     }
   }
 

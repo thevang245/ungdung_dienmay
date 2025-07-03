@@ -103,14 +103,7 @@ class BottomActionBar extends StatelessWidget {
             ),
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: Colors.white,
-                      width: 8,
-                    ),
-                  ),
-                ),
+                
                 child: ElevatedButton(
                   onPressed: () async {
                     await APICartService.addToCart(

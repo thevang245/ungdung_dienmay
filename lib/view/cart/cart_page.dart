@@ -82,6 +82,14 @@ class PageCartState extends State<PageCart> {
         isLoading = false;
       });
     }
+    final total = await APICartService.getCartItemCountFromApi(Global.email);
+
+    if (widget.cartitemCount.value != total) {
+      widget.cartitemCount.value = total;
+    } else {
+      widget.cartitemCount.value++;
+      widget.cartitemCount.value = total;
+    }
   }
 
   Future<void> chonNhieuVaMoBottomSheet(List<int> productIdsVuaThem) async {

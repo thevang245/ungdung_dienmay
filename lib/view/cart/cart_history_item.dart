@@ -110,8 +110,7 @@ class _HistoryCardState extends State<HistoryCard> {
                               SnackBar(
                                 content:
                                     const Text('Hủy đơn không thành công.'),
-                                backgroundColor:
-                                    Colors.red, // Đồng nhất màu
+                                backgroundColor: Colors.red, // Đồng nhất màu
                               ),
                             );
                           }
@@ -282,8 +281,10 @@ class _HistoryCardState extends State<HistoryCard> {
                           ),
                         )
                       : TextButton(
-                          onPressed: () =>
-                              _confirmCancel(context, widget.items),
+                          onPressed: (widget.status == '1' ||
+                                  widget.status == '2')
+                              ? null 
+                              : () => _confirmCancel(context, widget.items),
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.white,
                             minimumSize: const Size(70, 28),

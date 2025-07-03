@@ -44,7 +44,6 @@ Future<void> handleDatHang(
         email: email,
         tel: tel,
         address: address,
-        note: note,
         totalPrice: totalPrice,
         items: selectedItems,
         moduletype: moduletype);

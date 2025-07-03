@@ -55,11 +55,11 @@ class CarthistoryPageState extends State<CarthistoryPage>
     super.initState();
     _tabController = TabController(length: _statusLabels.length, vsync: this);
 
-    _tabController.animation!.addListener(() {
-      setState(() {});
-    });
-
-    loadOrderHistory();
+   _tabController.addListener(() {
+    if (_tabController.indexIsChanging) return; 
+    loadOrderHistory(); 
+  });
+  loadOrderHistory();
   }
 
   @override
@@ -158,12 +158,15 @@ class CarthistoryPageState extends State<CarthistoryPage>
                       final pendingOrders = orders
                           .where((order) => (order.status ?? '') == '0')
                           .toList();
-                      final confirmedOrders =
-                          orders.where((order) => order.status == '1').toList();
-                      final shippingOrders =
-                          orders.where((order) => order.status == '2').toList();
-                      final deliveredOrders =
-                          orders.where((order) => order.status == '3').toList();
+                      final confirmedOrders = orders
+                          .where((order) => (order.status ?? '') == '1')
+                          .toList();
+                      final shippingOrders = orders
+                          .where((order) => (order.status ?? '') == '2')
+                          .toList();
+                      final deliveredOrders = orders
+                          .where((order) => (order.status ?? '') == '3')
+                          .toList();
 
                       return TabBarView(
                         controller: _tabController,
@@ -190,7 +193,9 @@ class CarthistoryPageState extends State<CarthistoryPage>
           Container(
             color: Colors.black.withOpacity(0.5),
             child: const Center(
-              child: CircularProgressIndicator(color: Color(0xff0066FF),),
+              child: CircularProgressIndicator(
+                color: Color(0xff0066FF),
+              ),
             ),
           ),
       ],

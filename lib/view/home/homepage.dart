@@ -119,17 +119,14 @@ class HomePageState extends State<HomePage> {
   Future<void> fetchProducts() async {
     if (!mounted) return;
     setState(() => isLoading = true);
-
     try {
       List<dynamic> allProducts = [];
       String newCategoryName = '';
       String newIdCatalog = '';
-
       if (_categoryId == 35001) {
         for (int id in dynamicCategoryIds) {
           final modules = categoryModules[id];
           if (modules == null) continue;
-
           final Map<String, dynamic> response =
               await APIService.fetchProductsByCategory(
                   ww2: modules[0],
@@ -137,13 +134,10 @@ class HomePageState extends State<HomePage> {
                   extention: modules[2],
                   categoryId: id,
                   idfilter: '0');
-
           final String categoryTitle =
               response['tieude'] ?? 'Không rõ tên danh mục';
           final String GetIdCatalog = response['idcatalog']?.toString() ?? '';
-          print('idcatalog: $GetIdCatalog');
 
-          // Gán tạm tên danh mục đầu tiên (nếu bạn muốn hiện danh mục cha)
           if (newCategoryName.isEmpty) newCategoryName = categoryTitle;
           if (newIdCatalog.isEmpty) newIdCatalog = GetIdCatalog;
 
@@ -201,7 +195,6 @@ class HomePageState extends State<HomePage> {
 
       if (!mounted) return;
 
-      // Cập nhật 1 lần duy nhất sau khi hoàn tất
       setState(() {
         products = allProducts;
         categoryName = newCategoryName;
@@ -209,7 +202,7 @@ class HomePageState extends State<HomePage> {
         isLoading = false;
       });
     } catch (e) {
-      print("❌ Lỗi khi fetch sản phẩm: $e");
+      print("Lỗi khi fetch sản phẩm: $e");
       if (mounted) {
         setState(() => isLoading = false);
       }
@@ -254,29 +247,23 @@ class HomePageState extends State<HomePage> {
 
     try {
       final result = await APIService.searchSanPham(keyword);
-      print('🔍 Số sản phẩm tìm thấy: ${result.length}');
-      result.take(5).forEach((item) {
-        print(
-            '🧾 SP: ${item['name']} | ID: ${item['id']} | Giá: ${item['price']} | Ảnh: ${item['image']} | Kieuhienthi: ${item['kieuhienthi']}');
-      });
 
       if (!mounted) return;
       setState(() {
         products = result.map((item) {
           return {
             ...item,
-            'categoryId': item['categoryId'] ?? 0, // Đảm bảo categoryId là 0
-            'hinhdaidien': item['image'] ?? '', // Xử lý image rỗng
-            'gia': item['price'] ?? 0.0, // Xử lý price rỗng
-            'tieude': item['name'] ?? 'Unknown', // Xử lý name rỗng
+            'categoryId': item['categoryId'] ?? 0,
+            'hinhdaidien': item['image'] ?? '',
+            'gia': item['price'] ?? 0.0,
+            'tieude': item['name'] ?? 'Unknown',
             'moduleType': item['kieuhienthi'],
           };
         }).toList();
         isLoading = false;
       });
-      print('Products after setState: $products');
     } catch (e) {
-      print('❌ Lỗi khi tìm kiếm: $e');
+      print('Lỗi khi tìm kiếm: $e');
       if (!mounted) return;
       setState(() => isLoading = false);
     }
@@ -571,7 +558,7 @@ class CategoryLabelPainter extends CustomPainter {
 
   CategoryLabelPainter({
     required this.labelWidth,
-    this.notchHeight = 25,
+    this.notchHeight = 26,
   });
 
   @override
@@ -583,7 +570,7 @@ class CategoryLabelPainter extends CustomPainter {
     final path = Path();
 
     path.moveTo(0, 0);
-    path.lineTo(labelWidth - 35, 0);
+    path.lineTo(labelWidth - 25, 0);
     path.lineTo(labelWidth, notchHeight);
     path.lineTo(labelWidth, size.height);
     path.lineTo(0, size.height);

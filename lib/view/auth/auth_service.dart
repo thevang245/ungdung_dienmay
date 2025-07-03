@@ -11,13 +11,11 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
+  
   static Future<Map<String, dynamic>?> _login(
       String username, String password) async {
     try {
       final Uri url = Uri.parse(APIService.loginUrl);
-      print('urllogin $url');
-      print('username: $username, password: $password');
-
       final response = await http.post(
         url,
         headers: {
@@ -29,10 +27,8 @@ class AuthService {
           'password': password,
         }),
       );
-
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
-
         if (body['success'] == true && body['data'] != null) {
           return body['data'];
         } else {

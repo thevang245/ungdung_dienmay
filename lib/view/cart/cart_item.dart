@@ -50,7 +50,6 @@ class _ItemCartState extends State<ItemCart> {
     if (widget.cartitemCount.value != total) {
       widget.cartitemCount.value = total;
     } else {
-      // Ép rebuild nếu giá trị không đổi
       widget.cartitemCount.value++;
       widget.cartitemCount.value = total;
     }
