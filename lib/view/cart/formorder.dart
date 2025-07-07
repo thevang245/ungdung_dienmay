@@ -117,7 +117,7 @@ class _OrderConfirmationSheetState extends State<OrderConfirmationSheet> {
                         elevation: 0,
                         shadowColor: Colors.transparent,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadiusGeometry.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                             side:
                                 BorderSide(width: 0.5, color: Colors.black38)),
                         backgroundColor: Colors.white,
