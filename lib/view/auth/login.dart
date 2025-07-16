@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/view/allpage.dart';
-import 'package:flutter_application_1/view/auth/auth_service.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/view/auth/register.dart';
 import 'package:flutter_application_1/widgets/button_widget.dart';
 import 'package:flutter_application_1/widgets/input_widget.dart';
@@ -29,6 +29,8 @@ class _LoginState extends State<Login> {
     _password.dispose();
     super.dispose();
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +59,6 @@ class _LoginState extends State<Login> {
                     child: Container(
                       width: double.infinity,
                       margin: EdgeInsets.only(right: 30, left: 30),
-                      
                       decoration: BoxDecoration(
                         color: Color(0xff0066FF), // Nền đen trong suốt
                         borderRadius: BorderRadius.circular(20),
@@ -70,7 +71,10 @@ class _LoginState extends State<Login> {
                           SizedBox(width: 5),
                           Text(
                             'Quay lại trang trước',
-                            style: TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -82,7 +86,6 @@ class _LoginState extends State<Login> {
                       child: appLogo,
                     ),
                   ),
-
                   FormLabel('Số điện thoại/Email'),
                   const SizedBox(height: 6),
                   CustomTextField(
@@ -138,7 +141,10 @@ class _LoginState extends State<Login> {
                   ),
                   Center(child: textLoginWith()),
                   buildSocialIconButton(
-                      'asset/google.png', 'Đăng nhập với Google', () {})
+                    'asset/google.png',
+                    'Đăng nhập với Google',
+                    () => AuthService.handleGoogleLogin(context),
+                  )
                 ],
               ),
             )),

@@ -20,7 +20,7 @@ class favouritePageState extends State<favouritePage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // Bắt lifecycle
+    WidgetsBinding.instance.addObserver(this);
     loadUserAndFavourites();
     reloadFavourites();
   }
@@ -67,7 +67,7 @@ class favouritePageState extends State<favouritePage>
       backgroundColor: Colors.grey[100],
       body: RefreshIndicator(
         color: Color(0xff0066FF),
-        onRefresh: reloadFavourites, // Gọi lại hàm tải dữ liệu
+        onRefresh: reloadFavourites,
         child: favouriteItems.isEmpty
             ? Center(
                 child: Column(
@@ -95,17 +95,18 @@ class favouritePageState extends State<favouritePage>
                             Container(
                               padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(12)),
-                                border: Border.all(width: 0.5,color: Colors.black12)
-                              ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12)),
+                                  border: Border.all(
+                                      width: 0.5, color: Colors.black12)),
                               child: Image.network(
-                              '${item['hinhdaidien']}',
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.image, size: 60),
-                            ),
+                                '${item['hinhdaidien']}',
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.image, size: 60),
+                              ),
                             ),
                             Expanded(
                               child: Padding(
@@ -118,18 +119,22 @@ class favouritePageState extends State<favouritePage>
                                       style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
-                                      
                                       ),
                                       maxLines: 2,
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      '${formatCurrency(item['gia'])}₫',
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 15,
+                                    if (item['gia'] != null &&
+                                        item['gia']
+                                            .toString()
+                                            .trim()
+                                            .isNotEmpty)
+                                      Text(
+                                        '${formatCurrency(item['gia'])}₫',
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 15,
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),

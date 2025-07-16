@@ -123,10 +123,12 @@ class HomePageState extends State<HomePage> {
       List<dynamic> allProducts = [];
       String newCategoryName = '';
       String newIdCatalog = '';
+
       if (_categoryId == 35001) {
         for (int id in dynamicCategoryIds) {
           final modules = categoryModules[id];
           if (modules == null) continue;
+
           final Map<String, dynamic> response =
               await APIService.fetchProductsByCategory(
                   ww2: modules[0],
@@ -134,6 +136,7 @@ class HomePageState extends State<HomePage> {
                   extention: modules[2],
                   categoryId: id,
                   idfilter: '0');
+
           final String categoryTitle =
               response['tieude'] ?? 'Không rõ tên danh mục';
           final String GetIdCatalog = response['idcatalog']?.toString() ?? '';
@@ -153,6 +156,16 @@ class HomePageState extends State<HomePage> {
           }).toList();
 
           allProducts.addAll(enhanced);
+
+          // Update UI incrementally after each category is fetched
+          if (mounted) {
+            setState(() {
+              products = List.from(allProducts); // Update products incrementally
+              categoryName = newCategoryName;
+              IdCatalogInitial = newIdCatalog;
+              isLoading = false; // Keep isLoading false to avoid showing loading indicator
+            });
+          }
         }
       } else {
         final modules = categoryModules[_categoryId];
@@ -191,16 +204,16 @@ class HomePageState extends State<HomePage> {
             'categoryTitle': categoryTitle,
           };
         }).toList();
+
+        if (!mounted) return;
+
+        setState(() {
+          products = allProducts;
+          categoryName = newCategoryName;
+          IdCatalogInitial = newIdCatalog;
+          isLoading = false;
+        });
       }
-
-      if (!mounted) return;
-
-      setState(() {
-        products = allProducts;
-        categoryName = newCategoryName;
-        IdCatalogInitial = newIdCatalog;
-        isLoading = false;
-      });
     } catch (e) {
       print("Lỗi khi fetch sản phẩm: $e");
       if (mounted) {

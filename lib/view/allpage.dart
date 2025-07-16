@@ -3,7 +3,7 @@ import 'package:flutter_application_1/models/order_history_model.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
-import 'package:flutter_application_1/view/auth/auth_service.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/view/auth/login.dart';
 import 'package:flutter_application_1/view/auth/register.dart';
 import 'package:flutter_application_1/view/cart/cart_history.dart';
@@ -217,7 +217,7 @@ class _PageAllState extends State<PageAll> {
                   _currentPage = _previousPage;
                   _detailPage = null;
                   selectedProduct = null;
-                  _previousPage = 'home'; // reset nếu quay lại xong
+                  _previousPage = 'home'; 
                   _productDetailStack.clear();
                 });
               }

@@ -88,7 +88,7 @@ class DetailPageState extends State<DetailPage> {
         htmlContent = detail['noidungchitiet'];
         isLoading = false;
         selectedImageUrl = hinhAnhs.isNotEmpty ? hinhAnhs[0] : null;
-        isLoadingHtml = false; 
+        isLoadingHtml = false;
       });
     } else {
       setState(() {
@@ -145,8 +145,6 @@ class DetailPageState extends State<DetailPage> {
       _productsRelated = enhancedProducts;
     });
   }
-
-  
 
   @override
   void dispose() {
@@ -425,9 +423,8 @@ class DetailPageState extends State<DetailPage> {
                             userId: Global.email,
                             productId: int.tryParse(widget.productId) ?? 0,
                             tieude: product['tieude'],
-                            gia: product['gia'],
-                            hinhdaidien:
-                                '${product['hinhdaidien']}',
+                            gia: product['gia']?? '',
+                            hinhdaidien: '${product['hinhdaidien']}',
                           );
                         },
                       ),

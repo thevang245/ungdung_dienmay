@@ -7,11 +7,11 @@ import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crypto/crypto.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  
   static Future<Map<String, dynamic>?> _login(
       String username, String password) async {
     try {
@@ -71,9 +71,10 @@ class AuthService {
       final passw = prefs.getString('pass');
       print('Đăng nhập thành công: $username && mật khẩu MD5: $passw');
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => PageAll()),
+        (route) => false,
       );
     } else {
       showToast('Đăng nhập thất bại', backgroundColor: Colors.red);
@@ -107,21 +108,88 @@ class AuthService {
     print('Global.pass: ${Global.pass}');
   }
 
-  // Kiểm tra đã login chưa
   static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('isLoggedIn') ?? false;
   }
 
-  // Lấy userid đã lưu
   static Future<String> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('emailAddress') ?? '';
   }
 
-  // Lấy password đã lưu
   static Future<String> getPassword() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('passWord') ?? '';
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<User?> signInWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+    if (googleUser == null) return null;
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential = await _auth.signInWithCredential(credential);
+    return userCredential.user;
+  }
+
+  static Future<void> handleGoogleLogin(BuildContext context) async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn.standard();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        showToast('Đăng nhập Google bị hủy', backgroundColor: Colors.orange);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('customerID', user.uid); // Dùng UID Firebase
+        await prefs.setString('customerName', user.displayName ?? '');
+        await prefs.setString('maKH', ''); // Không có mã KH khi login Google
+        await prefs.setString('emailAddress', user.email ?? '');
+        await prefs.setString('passWord', ''); // Google không có mật khẩu
+
+        print(
+            'Đăng nhập Google thành công: ${user.displayName} (${user.email})');
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => PageAll()),
+          (route) => false,
+        );
+      } else {
+        showToast('Đăng nhập Google thất bại', backgroundColor: Colors.red);
+      }
+    } catch (e) {
+      print('Lỗi đăng nhập Google: $e');
+      showToast('Có lỗi khi đăng nhập Google', backgroundColor: Colors.red);
+    }
   }
 }

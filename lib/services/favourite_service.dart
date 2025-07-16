@@ -15,7 +15,7 @@ class APIFavouriteService {
     required String tieude,
     required String gia,
     required String hinhdaidien,
-    required String moduleType, // 👈 Thêm tham số moduleType
+    required String moduleType, 
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'favourite_items_$userId';
@@ -26,7 +26,7 @@ class APIFavouriteService {
       'tieude': tieude,
       'gia': gia,
       'hinhdaidien': hinhdaidien,
-      'moduleType': moduleType, // 👈 Thêm vào đây
+      'moduleType': moduleType,
     };
 
     bool exists = false;
@@ -47,13 +47,13 @@ class APIFavouriteService {
       favouriteItems.remove(existingItem);
       await prefs.setStringList(key, favouriteItems);
       showToast('Đã xóa khỏi yêu thích');
-      print('❌ Đã xóa khỏi yêu thích: $productId');
+      print('Đã xóa khỏi yêu thích: $productId');
       return false;
     } else {
       favouriteItems.add(json.encode(itemMap));
       await prefs.setStringList(key, favouriteItems);
       showToast('Đã thêm vào yêu thích');
-      print('❤️ Đã thêm vào yêu thích: $productId');
+      print('Đã thêm vào yêu thích: $productId');
       return true;
     }
   }
