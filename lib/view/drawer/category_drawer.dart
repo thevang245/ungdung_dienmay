@@ -11,7 +11,8 @@ class DanhMucDrawer extends StatelessWidget {
   
   Future<List<dynamic>> fetchDanhMuc() async {
     final response = await http.get(Uri.parse(
-        '${APIService.baseUrl}/api/web.vitritop.php'));
+        '${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}'));
+        print(response);
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return json[0]['data'] ?? [];

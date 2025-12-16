@@ -7,8 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class APIService {
-  static const String baseUrl = 'https://054fed4c3204.ngrok-free.app';
-  static const String loginUrl = '$baseUrl/api/login.php';
+  static const String baseUrl = 'https://vangtran.125.atoz.vn';
+  static const String language = 'ashx';
+  static const String loginUrl = '$baseUrl/ww2/login.${language}';
 
   static Future<Map<String, dynamic>> fetchProductsByCategory({
     required int categoryId,
@@ -21,11 +22,11 @@ class APIService {
     late Uri uri;
 
     if (categoryId == 0) {
-      uri = Uri.parse('${baseUrl}/api/module.sanpham.trangchu.php').replace(
+      uri = Uri.parse('${baseUrl}/ww2/module.sanpham.trangchu.${language}').replace(
         queryParameters: {'id': '35279'},
       );
     } else {
-      uri = Uri.parse('$baseUrl/api/$extention.$product.php?id').replace(
+      uri = Uri.parse('$baseUrl/ww2/$extention.$product.${language}?id').replace(
         queryParameters: {
           'id': categoryId.toString(),
           'sl': '10',
@@ -35,7 +36,7 @@ class APIService {
       );
     }
 
-    print(uri);
+    print("url: ${uri}");
     try {
       final response = await http.get(uri);
 
@@ -44,7 +45,7 @@ class APIService {
 
         if (decoded is List && decoded.isNotEmpty && decoded[0] is Map) {
           return decoded[
-              0]; // trả nguyên cả phần tử đầu tiên (có tieude, data, ...)
+              0]; 
         } else {
           print('Phản hồi không hợp lệ');
           return {};
@@ -67,7 +68,7 @@ class APIService {
   }) async {
     try {
       final uri = Uri.parse(
-        '$baseUrl/api/module.$modelType.chitiet.lienquan.php',
+        '$baseUrl/ww2/module.$modelType.chitiet.lienquan.${language}',
       ).replace(
         queryParameters: {
           'id': id,
@@ -147,7 +148,7 @@ class APIService {
 
   static Future<List<Map<String, dynamic>>> searchSanPham(
       String keyword) async {
-    final uri = Uri.parse('${baseUrl}/api/search.sanpham.php');
+    final uri = Uri.parse('${baseUrl}/ww2/search.sanpham.${language}');
     try {
       final response = await http.post(
         uri,
@@ -190,7 +191,7 @@ class APIService {
   }
 
   static Future<Map<String, dynamic>> getBoLocByCatalog(String idCatalog) async {
-    final uri = Uri.parse('$baseUrl/api/getfilter?IDCatalog=$idCatalog');
+    final uri = Uri.parse('$baseUrl/ww2/getfilter?IDCatalog=$idCatalog');
 
     try {
       final response = await http.get(uri);
@@ -208,7 +209,7 @@ class APIService {
   }
 
   static Future<List<dynamic>> fetchBoLocChiTiet(String id) async {
-    final url = Uri.parse('$baseUrl/api/getfilter?IDCatalog=$id');
+    final url = Uri.parse('$baseUrl/ww2/getfilter?IDCatalog=$id');
 
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
@@ -230,7 +231,7 @@ class APIService {
       Function(List<String>) getDanhSachHinh) async {
     final int productIdInt = int.tryParse(productId) ?? 0;
     final String url =
-        '$baseUrl/api/module.$danhmuc.chitiet.php?id=$productIdInt';
+        '$baseUrl/ww2/module.$danhmuc.chitiet.${language}?id=$productIdInt';
     print('Fetching product details from: $url');
 
     try {

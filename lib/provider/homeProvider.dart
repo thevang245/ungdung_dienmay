@@ -31,11 +31,12 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> fetchDanhMuc() async {
     try {
-      final url = Uri.parse('${APIService.baseUrl}/api/web.vitritop.php');
+      final url = Uri.parse('${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}');
+      print("url: ${url}");
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final jsonBody = jsonDecode(response.body);
-        final rawList = jsonBody[0]['data'];
+        final rawList = jsonBody[0]['data'] ?? [];
 
         dynamicCategoryIds = rawList.map<int>((item) {
           return int.tryParse(item['id'].toString()) ?? 0;
