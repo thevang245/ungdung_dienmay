@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/view/until/until.dart';
 import 'package:flutter_application_1/widgets/widget_auth.dart';
 import 'package:http/http.dart' as http;
 
 class DanhMucDrawer extends StatelessWidget {
   final void Function(int) onCategorySelected;
   DanhMucDrawer({required this.onCategorySelected});
+  
   Future<List<dynamic>> fetchDanhMuc() async {
     final response = await http.get(Uri.parse(
         '${APIService.baseUrl}/api/web.vitritop.php'));
-
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       return json[0]['data'] ?? [];
@@ -32,7 +33,9 @@ class DanhMucDrawer extends StatelessWidget {
             Container(
               height: appBarHeight,
               width: double.infinity,
-              color: Color(0xFF198754),
+              decoration: BoxDecoration(
+                gradient: gradientBackground
+              ),
               child: Stack(
                 children: [
                   Center(
@@ -137,7 +140,7 @@ class DanhMucDrawer extends StatelessWidget {
                   text: 'Chồi Xanh Media ',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF198754),
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -185,14 +188,14 @@ class _InfoRow extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.green[100],
+            color: Colors.blue[100],
             borderRadius: BorderRadius.circular(6),
           ),
           padding: EdgeInsets.all(6),
           child: Icon(
             icon,
             size: 20,
-            color: Color(0xFF198754),
+            color: appColor,
           ),
         ),
         SizedBox(width: 12),

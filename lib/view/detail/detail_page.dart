@@ -28,20 +28,15 @@ class DetailPage extends StatefulWidget {
   final String productId;
   final ValueNotifier<int> categoryNotifier;
   final ValueNotifier<int> cartitemCount;
-  final VoidCallback? onBack;
-  final void Function(dynamic product)? onProductTap;
   final String? modelType;
-  final void Function(int?) gotoCart;
 
-  const DetailPage(
-      {super.key,
-      required this.productId,
-      required this.categoryNotifier,
-      required this.cartitemCount,
-      this.onBack,
-      this.onProductTap,
-      this.modelType,
-      required this.gotoCart});
+  const DetailPage({
+    super.key,
+    required this.productId,
+    required this.categoryNotifier,
+    required this.cartitemCount,
+    this.modelType,
+  });
 
   @override
   State<DetailPage> createState() => DetailPageState();
@@ -56,7 +51,7 @@ class DetailPageState extends State<DetailPage> {
   bool isLoading = true;
   bool isBackVisible = true;
   final ScrollController _scrollController = ScrollController();
-  // List<dynamic> commentCard = [];
+
   late String moduleType;
   List<dynamic> _productsRelated = [];
 
@@ -201,7 +196,7 @@ class DetailPageState extends State<DetailPage> {
                         children: [
                           if (model == 'sanpham')
                             Text(
-                              'Giá: ${formatCurrency(price)}đ',
+                              '${formatCurrency(price)}đ',
                               style: const TextStyle(
                                 fontSize: 20,
                                 color: Colors.redAccent,
@@ -265,11 +260,7 @@ class DetailPageState extends State<DetailPage> {
                                       return RelatedNewsCard(
                                         model: model,
                                         product: item,
-                                        onTap: () {
-                                          if (widget.onProductTap != null) {
-                                            widget.onProductTap!(item);
-                                          }
-                                        },
+                                        categoryNotifier: widget.categoryNotifier,
                                       );
                                     },
                                   )
@@ -283,11 +274,7 @@ class DetailPageState extends State<DetailPage> {
                                         return RelatedProductCard(
                                           model: model,
                                           product: item,
-                                          onTap: () {
-                                            if (widget.onProductTap != null) {
-                                              widget.onProductTap!(item);
-                                            }
-                                          },
+                                          categoryNotifier: widget.categoryNotifier,
                                         );
                                       },
                                     ),
@@ -296,82 +283,6 @@ class DetailPageState extends State<DetailPage> {
                         ),
                       ),
                     ],
-                    // if (commentCard.isNotEmpty && model != 'tintuc') ...[
-                    //   Container(
-                    //     color: Colors.grey[50], // màu nền xám nhạt
-                    //     padding: const EdgeInsets.symmetric(vertical: 12),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         const Padding(
-                    //           padding: EdgeInsets.only(left: 8),
-                    //           child: Text(
-                    //             'Khách hàng nhận xét',
-                    //             style: TextStyle(
-                    //               fontSize: 18,
-                    //               fontWeight: FontWeight.bold,
-                    //               color: Colors.black,
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         const SizedBox(height: 8),
-                    //         SizedBox(
-                    //           height: 180,
-                    //           child: ListView.builder(
-                    //             scrollDirection: Axis.horizontal,
-                    //             itemCount: commentCard.length,
-                    //             itemBuilder: (context, index) {
-                    //               final comment = commentCard[index];
-                    //               return CommentCard(
-                    //                 name: comment['tieude'] ?? 'Ẩn danh',
-                    //                 content: parseHtmlString(
-                    //                     comment['noidungtomtat'] ?? ''),
-                    //               );
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ],
-                    // if (commentCard.isNotEmpty && model != 'tintuc') ...[
-                    //   Container(
-                    //     color: Colors.grey[50],
-                    //     padding: const EdgeInsets.symmetric(vertical: 12),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         const Padding(
-                    //           padding: EdgeInsets.only(left: 8),
-                    //           child: Text(
-                    //             'Khách hàng nhận xét',
-                    //             style: TextStyle(
-                    //               fontSize: 18,
-                    //               fontWeight: FontWeight.bold,
-                    //               color: Colors.black,
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         const SizedBox(height: 8),
-                    //         SizedBox(
-                    //           height: 180,
-                    //           child: ListView.builder(
-                    //             scrollDirection: Axis.horizontal,
-                    //             itemCount: commentCard.length,
-                    //             itemBuilder: (context, index) {
-                    //               final comment = commentCard[index];
-                    //               return CommentCard(
-                    //                 name: comment['tieude'] ?? 'Ẩn danh',
-                    //                 content: parseHtmlString(
-                    //                     comment['noidungtomtat'] ?? ''),
-                    //               );
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ],
                   ],
                 ),
               ),
@@ -399,9 +310,7 @@ class DetailPageState extends State<DetailPage> {
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () {
-                          if (widget.onBack != null) {
-                            widget.onBack!();
-                          }
+                          Navigator.pop(context);
                         },
                       ),
                     ),
@@ -423,7 +332,7 @@ class DetailPageState extends State<DetailPage> {
                             userId: Global.email,
                             productId: int.tryParse(widget.productId) ?? 0,
                             tieude: product['tieude'],
-                            gia: product['gia']?? '',
+                            gia: product['gia'] ?? '',
                             hinhdaidien: '${product['hinhdaidien']}',
                           );
                         },
@@ -458,7 +367,6 @@ class DetailPageState extends State<DetailPage> {
               (productDetail?['gia'] ?? '').toString().trim().isNotEmpty &&
               hinhAnhs.isNotEmpty)
             BottomActionBar(
-              gotoCart: widget.gotoCart,
               moduleType: moduleType,
               tieude: product['tieude'],
               gia: product['gia'],

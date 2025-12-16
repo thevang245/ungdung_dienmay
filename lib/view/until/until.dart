@@ -162,3 +162,5 @@ String formatCurrency(dynamic price) {
     return price.toString();
   }
 }
+
+Color appColor = Color(0xff0033FF);

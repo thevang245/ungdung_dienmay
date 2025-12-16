@@ -14,9 +14,7 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hinhDaiDienList = getDanhSachHinh(product);
-    final hinhDaiDien = hinhDaiDienList.isNotEmpty
-        ? hinhDaiDienList.first
-        : '';
+    final hinhDaiDien = hinhDaiDienList.isNotEmpty ? hinhDaiDienList.first : '';
 
     final Map<String, String> specs = {
       'Thương hiệu': getNestedTengoi(product, 'thuonghieu'),
@@ -37,13 +35,18 @@ class ProductCard extends StatelessWidget {
       'Công nghệ': getNestedTengoi(product, 'congnghe'),
       'Công suất': getNestedTengoi(product, 'congsuat'),
       'Loại máy': getNestedTengoi(product, 'loaimay'),
-      
     };
 
     return InkWell(
       onTap: () {
-       onTap?.call();
-
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => DetailPage(
+                      productId: product['id'].toString(),
+                      categoryNotifier: ValueNotifier<int>(categoryId),
+                      cartitemCount: ValueNotifier<int>(1),
+                    )));
       },
       child: Card(
         color: Colors.white,
@@ -72,7 +75,8 @@ class ProductCard extends StatelessWidget {
                         fontWeight: FontWeight.bold, color: Colors.red)),
               if (product['tieude']?.toString().trim().isNotEmpty ?? false)
                 Text(product['tieude'],
-                    style: TextStyle(fontWeight: FontWeight.w600,fontSize: 13)),
+                    style:
+                        TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               if (categoryId == 35004 &&
                   (product['diachiND']?.toString().trim().isNotEmpty ?? false))
                 Row(

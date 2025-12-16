@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/order_history_model.dart';
 import 'package:flutter_application_1/models/product_model.dart';
@@ -12,13 +12,11 @@ import 'package:flutter_application_1/view/until/until.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CarthistoryPage extends StatefulWidget {
-  final Function(dynamic product) onProductTap;
   final void Function(List<int>? productIds) gotoCart;
   final ValueNotifier<int> cartitemCount;
 
   const CarthistoryPage({
     super.key,
-    required this.onProductTap,
     required this.cartitemCount,
     required this.gotoCart,
   });
@@ -189,7 +187,6 @@ class CarthistoryPageState extends State<CarthistoryPage>
                     date: order.date,
                     totalPrice: order.totalPrice,
                     items: order.items,
-                    onTap: (item) => widget.onProductTap(item),
                     onReorder: (List<CartItemModel> items) async {
                       bool success = true; // Thêm biến để trả về trạng thái
                       String? errorMessage;

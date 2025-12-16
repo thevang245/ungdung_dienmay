@@ -10,7 +10,7 @@ class HistoryCard extends StatefulWidget {
   final String status;
   final List<CartItemModel> items;
   final Function(List<CartItemModel> items) onReorder;
-  final Function(CartItemModel item) onTap;
+ 
   final VoidCallback startLoading;
   final VoidCallback stopLoading;
 
@@ -22,7 +22,7 @@ class HistoryCard extends StatefulWidget {
       required this.status,
       required this.items,
       required this.onReorder,
-      required this.onTap,
+      
       required this.startLoading,
       required this.stopLoading});
 
@@ -171,7 +171,7 @@ class _HistoryCardState extends State<HistoryCard> {
               ...widget.items.map((item) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: InkWell(
-                    onTap: () => widget.onTap?.call(item),
+                    
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

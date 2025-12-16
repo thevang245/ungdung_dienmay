@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/provider/profileProvider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/view/allpage.dart';
 import 'package:flutter_application_1/view/auth/login.dart';
@@ -10,6 +11,7 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class AuthService {
   static Future<Map<String, dynamic>?> _login(
@@ -51,7 +53,10 @@ class AuthService {
   }
 
   static Future<void> handleLogin(
-      BuildContext context, String username, String password) async {
+    BuildContext context,
+    String username,
+    String password,
+  ) async {
     if (username.isEmpty || password.isEmpty) {
       showToast('Vui lòng nhập đầy đủ thông tin', backgroundColor: Colors.red);
       return;
@@ -60,16 +65,26 @@ class AuthService {
     var userData = await _login(username, password);
 
     if (userData != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('customerID', userData['CustomerID'].toString());
-      await prefs.setString('customerName', userData['CustomerName'] ?? '');
-      await prefs.setString('maKH', userData['MaKH'] ?? '');
-      await prefs.setString('emailAddress', username);
-      await prefs.setString('passWord', generateMd5(password));
+      // In toàn bộ dữ liệu nhận được từ API
+      print("===== ĐĂNG NHẬP THÀNH CÔNG =====");
+      print("Toàn bộ userData: $userData");
 
-      final passw = prefs.getString('pass');
-      print('Đăng nhập thành công: $username && mật khẩu MD5: $passw');
+      // Nếu muốn in từng trường rõ ràng
+      print("CustomerID: ${userData['CustomerID']}");
+      print("CustomerName: ${userData['CustomerName']}");
+      print("MaKH: ${userData['MaKH']}");
+      print("Email: $username");
+      print("PasswordHash: ${generateMd5(password)}");
+
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.saveToPrefs(
+        id: userData['CustomerID'].toString(),
+        name: userData['CustomerName'] ?? '',
+        maKHValue: userData['MaKH'] ?? '',
+        emailValue: username,
+        passwordHashValue: generateMd5(password),
+      );
 
       Navigator.pushAndRemoveUntil(
         context,

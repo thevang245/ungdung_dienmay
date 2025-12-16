@@ -39,20 +39,17 @@ Widget textSwitchPage({
   );
 }
 
-const BoxDecoration gradientBackground = BoxDecoration(
-  gradient: LinearGradient(
-    colors: [
-      Color(0xFF0033FF),
-      Colors.lightBlueAccent,
-    ],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  ),
+final Gradient gradientBackground = LinearGradient(
+  colors: [
+    Color(0xFF0033FF),
+    Colors.lightBlueAccent,
+  ],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
 );
-
 
 final Widget appLogo = Image.asset(
   'asset/logoapp.png',
-  width: 150,         // Giữ nguyên chiều rộng
+  width: 150, // Giữ nguyên chiều rộng
   fit: BoxFit.contain, // Đảm bảo ảnh nằm gọn trong container
 );

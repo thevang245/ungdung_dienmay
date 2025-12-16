@@ -14,3 +14,12 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+Future Job:
+<!-- - Khi chạy app lần đầu có thể load lâu, nhưng khi nhấn vào một danh mục đó 1 lần nữa sẽ nhanh  -->
+- Khi có dữ liệu mới thì mới load lại
+<!-- - Xem trang chi tiết của sản phẩm liên quan  -->
+- Thêm thanh toán online
+- Cập nhật lại code dễ đọc, ngắn gọn, tối ưu
+- Thêm lựa chọn màu sắc cho sản phẩm 
+

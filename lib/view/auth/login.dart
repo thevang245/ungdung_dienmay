@@ -36,7 +36,9 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: gradientBackground,
+        decoration: BoxDecoration(
+          gradient: gradientBackground
+        ),
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Center(

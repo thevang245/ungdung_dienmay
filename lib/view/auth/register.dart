@@ -26,12 +26,12 @@ class _RegisterState extends State<Register> {
   final _fullnameFocus = FocusNode();
   final _passwordFocus = FocusNode();
 
-  Future<bool> _register({
-    required String name, required String email, required String password
-  }) async {
+  Future<bool> _register(
+      {required String name,
+      required String email,
+      required String password}) async {
     try {
-      final Uri url = Uri.parse(
-          '${APIService.baseUrl}/api/register.php');
+      final Uri url = Uri.parse('${APIService.baseUrl}/api/register.php');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -91,7 +91,7 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: gradientBackground,
+        decoration: BoxDecoration(gradient: gradientBackground),
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Center(
@@ -164,7 +164,6 @@ class _RegisterState extends State<Register> {
                       maxline: 1,
                     ),
                     const SizedBox(height: 10),
-
                     FormLabel('Mật khẩu'),
                     const SizedBox(height: 6),
                     CustomTextField(

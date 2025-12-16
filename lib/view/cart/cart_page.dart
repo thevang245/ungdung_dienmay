@@ -1,29 +1,30 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/product_model.dart';
+import 'package:flutter_application_1/provider/profileProvider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
 import 'package:flutter_application_1/view/allpage.dart';
 import 'package:flutter_application_1/view/cart/bottom_bar.dart';
 import 'package:flutter_application_1/view/cart/cart_item.dart';
+import 'package:flutter_application_1/view/cart/confirm_order.dart';
 import 'package:flutter_application_1/view/cart/formorder.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/cart_ulti.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 import 'package:flutter_application_1/widgets/cart_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
-class PageCart extends StatefulWidget {
-  final Function(CartItemModel product) onProductTap;
+class CartPage extends StatefulWidget {
   final ValueNotifier<int> cartitemCount;
-  const PageCart(
-      {super.key, required this.onProductTap, required this.cartitemCount});
+  const CartPage({super.key, required this.cartitemCount});
 
   @override
-  State<PageCart> createState() => PageCartState();
+  State<CartPage> createState() => CartPageState();
 }
 
-class PageCartState extends State<PageCart> {
+class CartPageState extends State<CartPage> {
   List<CartItemModel> cartItems = [];
   bool isSelectAll = false;
   bool isLoading = true;
@@ -36,10 +37,10 @@ class PageCartState extends State<PageCart> {
   final emailController = TextEditingController();
 
   bool get hasSelectedItems => cartItems.any((item) => item.isSelect);
-  int get phiVanChuyen => hasSelectedItems ? 30000 : 0;
+
 
   double get tongThanhToan {
-    final totalPrice = calculateTotalPrice(cartItems) + phiVanChuyen;
+    final totalPrice = calculateTotalPrice(cartItems);
     return totalPrice.toDouble();
   }
 
@@ -56,6 +57,8 @@ class PageCartState extends State<PageCart> {
   }
 
   Future<void> loadCartItems() async {
+    final profile = Provider.of<ProfileProvider>(context, listen: false);
+
     try {
       final selectedIds = cartItems
           .where((item) => item.isSelect)
@@ -63,7 +66,7 @@ class PageCartState extends State<PageCart> {
           .toSet();
 
       final items =
-          await APICartService.fetchCartItemsById(emailAddress: Global.email);
+          await APICartService.fetchCartItemsById(emailAddress: profile.email);
 
       setState(() {
         cartItems = items.map((e) {
@@ -81,7 +84,7 @@ class PageCartState extends State<PageCart> {
         isLoading = false;
       });
     }
-    final total = await APICartService.getCartItemCountFromApi(Global.email);
+    final total = await APICartService.getCartItemCountFromApi(profile.email);
 
     if (widget.cartitemCount.value != total) {
       widget.cartitemCount.value = total;
@@ -192,9 +195,11 @@ class PageCartState extends State<PageCart> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedItems = cartItems.where((item) => item.isSelect).toList();
     rootContext = context;
     if (isLoading) {
       return const Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
             child: CircularProgressIndicator(
           color: Color(0xff0066FF),
@@ -217,7 +222,7 @@ class PageCartState extends State<PageCart> {
                         title: const Text('Chọn tất cả'),
                         value: isSelectAll,
                         onChanged: toggleSelectAll,
-                        activeColor: const Color(0xff0066FF),
+                        activeColor: appColor,
                       ),
                     Expanded(
                       child: cartItems.isEmpty
@@ -228,34 +233,6 @@ class PageCartState extends State<PageCart> {
                               itemBuilder: (context, index) {
                                 if (index == cartItems.length) {
                                   return Container(
-                                    margin:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    padding: const EdgeInsets.all(16),
-                                    color: Colors.white,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        if (hasSelectedItems) ...[
-                                          buildInfoRow(
-                                              "Tiền đơn hàng",
-                                              formatCurrency(
-                                                      calculateTotalPrice(
-                                                              cartItems)
-                                                          .toStringAsFixed(0)) +
-                                                  "₫"),
-                                          const SizedBox(height: 8),
-                                          buildInfoRow("Phí vận chuyển",
-                                              '${formatCurrency(phiVanChuyen)}₫'),
-                                          const Divider(
-                                              height: 20,
-                                              color: Colors.black12),
-                                          buildInfoRow("Tổng thanh toán",
-                                              '${formatCurrency(tongThanhToan)}₫',
-                                              isTotal: true),
-                                        ]
-                                      ],
-                                    ),
                                   );
                                 } else {
                                   final item = cartItems[index];
@@ -264,9 +241,6 @@ class PageCartState extends State<PageCart> {
                                     userId: Global.email,
                                     item: item,
                                     isSelected: item.isSelect,
-                                    onTap: () {
-                                      widget.onProductTap(item);
-                                    },
                                     onSelectedChanged: (value) {
                                       setState(() {
                                         item.isSelect = value ?? false;
@@ -313,81 +287,18 @@ class PageCartState extends State<PageCart> {
                   right: 0,
                   bottom: 0,
                   child: CartBottomBar(
+                    order: false,
+                    item: selectedItems,
                     isOrderEnabled: hasSelectedItems,
                     tongThanhToan: tongThanhToan,
                     onOrderPressed: () async {
-                      showModalBottomSheet(
-                        isScrollControlled: true,
-                        context: context,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-                        builder: (BuildContext context) {
-                          return OrderConfirmationSheet(
-                            parentContext: rootContext,
-                            addressController: addressController,
-                            fullnameController: fullnameController,
-                            phoneController: phoneController,
-                            emailController: emailController,
-                            tongThanhToan: tongThanhToan,
-                            onConfirm: () async {
-                              await showDialog(
-                                context: rootContext,
-                                barrierDismissible: false,
-                                builder: (dialogContext) {
-                                  Future(() async {
-                                    await handleDatHang(
-                                      moduletype: cartItems
-                                          .firstWhere((item) => item.isSelect)
-                                          .moduleType,
-                                      totalPrice: tongThanhToan,
-                                      address: addressController.text,
-                                      cartitemCount: widget.cartitemCount,
-                                      context: context,
-                                      userId: Global.email,
-                                      customerName: fullnameController.text,
-                                      email: emailController.text,
-                                      tel: phoneController.text,
-                                      cartItems: cartItems,
-                                      onCartReload: loadCartItems,
-                                    );
-                                    if (mounted) {
-                                      Navigator.of(dialogContext,
-                                              rootNavigator: true)
-                                          .pop();
-                                    }
-                                  });
-                                  return const Dialog(
-                                    backgroundColor: Colors.black87,
-                                    insetPadding: EdgeInsets.all(80),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(12)),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(20),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          CircularProgressIndicator(
-                                              color: Color(0xff0066FF)),
-                                          SizedBox(height: 16),
-                                          Text(
-                                            "Đang xử lý đơn hàng...",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        },
-                      );
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CheckoutPage(
+                                item: selectedItems,
+                                totalAmount: tongThanhToan),
+                          ));
                     },
                   ),
                 ),

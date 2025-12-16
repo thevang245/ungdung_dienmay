@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/view/detail/detail_page.dart';
 
 class RelatedNewsCard extends StatelessWidget {
   final Map<String, dynamic> product;
-  final VoidCallback onTap;
+  final ValueNotifier<int> categoryNotifier;
   final String model;
 
   const RelatedNewsCard({
     Key? key,
     required this.product,
-    required this.onTap,
+    required this.categoryNotifier,
     required this.model,
   }) : super(key: key);
 
@@ -25,9 +26,20 @@ class RelatedNewsCard extends StatelessWidget {
     final hasPrice = price != null && price.toString().trim().isNotEmpty;
 
     return Padding(
-      padding: const EdgeInsets.symmetric( vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailPage(
+                  modelType: model,
+                  productId: product['id'].toString(),
+                  categoryNotifier: ValueNotifier<int>(1),
+                  cartitemCount: ValueNotifier<int>(1),
+                ),
+              ));
+        },
         child: Card(
           color: Colors.white,
           elevation: 0,

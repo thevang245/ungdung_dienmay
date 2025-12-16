@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/product_model.dart';
+import 'package:flutter_application_1/view/cart/confirm_order.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 
 class CartBottomBar extends StatelessWidget {
   final double tongThanhToan;
   final VoidCallback onOrderPressed;
   final bool isOrderEnabled;
+  final List<CartItemModel> item;
+  final bool order;
 
   const CartBottomBar(
       {super.key,
       required this.tongThanhToan,
       required this.onOrderPressed,
-      this.isOrderEnabled = false});
+      this.isOrderEnabled = false,
+      required this.item,
+      this.order = false,
+      });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 55,
+      height: 60,
       color: Colors.white,
       child: Row(
         children: [
@@ -25,8 +32,8 @@ class CartBottomBar extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                     bottom: BorderSide(
-                        color: isOrderEnabled
-                            ? const Color(0xff0066FF)
+                        color: (isOrderEnabled || order) 
+                            ? appColor
                             : const Color(0xff99bbff),
                         width: 12)),
                 color: Colors.white,
@@ -56,10 +63,11 @@ class CartBottomBar extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(30)),
+                  
                   ),
               child: ElevatedButton(
                 onPressed: () {
-                  if (isOrderEnabled) {
+                  if (isOrderEnabled || order)  {
                     onOrderPressed();
                   } else {
                     showToast(
@@ -67,18 +75,18 @@ class CartBottomBar extends StatelessWidget {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isOrderEnabled
-                      ? const Color(0xff0066FF)
+                  backgroundColor: (isOrderEnabled || order) 
+                      ? appColor
                       : const Color(0xff99bbff), // xanh nhạt khi disable
                   foregroundColor: Colors.white,
                   shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero),
+                      borderRadius: BorderRadius.only(topLeft: Radius.circular(50))),
                   elevation: 0,
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'Đặt hàng',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    order? 'Đặt hàng' : 'Mua hàng',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

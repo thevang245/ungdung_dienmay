@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/provider/profileProvider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/view/detail/detail_page.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class favouritePage extends StatefulWidget {
-  final Function(dynamic product) onProductTap;
-  const favouritePage({super.key, required this.onProductTap});
+  const favouritePage({super.key});
 
   @override
   State<favouritePage> createState() => favouritePageState();
@@ -16,18 +18,19 @@ class favouritePage extends StatefulWidget {
 class favouritePageState extends State<favouritePage>
     with WidgetsBindingObserver {
   List<Map<String, dynamic>> favouriteItems = [];
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    loadUserAndFavourites();
-    reloadFavourites();
+
+    // Lấy email từ Provider
+    final profile = Provider.of<ProfileProvider>(context, listen: false);
+    reloadFavourites(profile.email);
   }
 
-  Future<void> reloadFavourites() async {
+  Future<void> reloadFavourites(String email) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'favourite_items_${Global.email}';
+    final key = 'favourite_items_$email';
     final items = prefs.getStringList(key) ?? [];
 
     final List<Map<String, dynamic>> loadedItems = [];
@@ -45,9 +48,9 @@ class favouritePageState extends State<favouritePage>
     });
   }
 
-  Future<void> loadUserAndFavourites() async {
+  Future<void> loadUserAndFavourites(String email) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'favourite_items_${Global.email}';
+    final key = 'favourite_items_$email';
     final items = prefs.getStringList(key) ?? [];
     print('favourite: $key');
 
@@ -63,11 +66,12 @@ class favouritePageState extends State<favouritePage>
 
   @override
   Widget build(BuildContext context) {
+    final profile = Provider.of<ProfileProvider>(context);
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: RefreshIndicator(
         color: Color(0xff0066FF),
-        onRefresh: reloadFavourites,
+        onRefresh: () => reloadFavourites(profile.email),
         child: favouriteItems.isEmpty
             ? Center(
                 child: Column(
@@ -83,7 +87,9 @@ class favouritePageState extends State<favouritePage>
                   final item = favouriteItems[index];
                   return GestureDetector(
                     onTap: () {
-                      widget.onProductTap(item);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPage(
+                        modelType: item['moduleType'],
+                        productId: item['id'].toString(), categoryNotifier: ValueNotifier<int>(1), cartitemCount: ValueNotifier<int>(1)),));
                     },
                     child: Card(
                       elevation: 0,

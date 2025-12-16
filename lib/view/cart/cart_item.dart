@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
+import 'package:flutter_application_1/view/detail/detail_page.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 
@@ -58,7 +59,11 @@ class _ItemCartState extends State<ItemCart> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: widget.onTap,
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPage(
+          modelType: widget.item.moduleType,
+          productId: widget.item.id.toString(), categoryNotifier: ValueNotifier<int>(1), cartitemCount: widget.cartitemCount),));
+      },
       child: Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: Material(
@@ -73,7 +78,7 @@ class _ItemCartState extends State<ItemCart> {
               Checkbox(
                 value: widget.isSelected,
                 onChanged: widget.onSelectedChanged,
-                activeColor: const Color(0xff0066FF),
+                activeColor: appColor,
               ),
               Container(
                 decoration: BoxDecoration(

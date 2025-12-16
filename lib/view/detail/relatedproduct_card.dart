@@ -1,17 +1,20 @@
 // lib/widgets/related_product_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/view/detail/detail_page.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 
 class RelatedProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
-  final VoidCallback onTap;
+  final ValueNotifier<int> categoryNotifier;
+
+ 
   final String model;
 
   const RelatedProductCard({
     Key? key,
     required this.product,
-    required this.onTap,
+    required this.categoryNotifier,
     required this.model
   }) : super(key: key);
 
@@ -31,7 +34,12 @@ class RelatedProductCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 12),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => 
+          DetailPage(modelType: model,
+            productId: product['id'].toString(), categoryNotifier: ValueNotifier<int>(1),
+                      cartitemCount: ValueNotifier<int>(1),),));
+        },
         child: SizedBox(
           width: 160,
           child: Card(

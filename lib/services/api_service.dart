@@ -7,8 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class APIService {
-  // static const String baseUrl = 'https://api-choixanh.onrender.com';
-  static const String baseUrl = 'https://46c0edd4db3c.ngrok-free.app';
+  static const String baseUrl = 'https://054fed4c3204.ngrok-free.app';
   static const String loginUrl = '$baseUrl/api/login.php';
 
   static Future<Map<String, dynamic>> fetchProductsByCategory({
@@ -16,7 +15,8 @@ class APIService {
     required String ww2,
     required String product,
     required String extention,
-    required String idfilter
+    required String idfilter,
+    required bool metaOnly
   }) async {
     late Uri uri;
 
