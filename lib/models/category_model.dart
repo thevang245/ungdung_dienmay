@@ -6,7 +6,7 @@ final Map<int, List<String>> categoryModules = {
   35001: ['api','sanpham','module'],
   35279: ['api','sanpham','module'],
   35278: ['api','sanpham','module'],
-  35283: ['api','sanpham','module'],  
-  35280: ['api','sanpham','module'],
-  35285: ['api','sanpham','module'],
+  60711: ['ww2','trangchu','module'],  
+  60714: ['ww2','sanpham','module'],
+ 
 };

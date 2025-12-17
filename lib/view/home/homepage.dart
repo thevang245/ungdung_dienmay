@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/category_model.dart';
+import 'package:flutter_application_1/models/category_selection.dart';
 import 'package:flutter_application_1/provider/homeProvider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/view/components/news_card.dart';
@@ -24,7 +25,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
-  final ValueNotifier<int> categoryNotifier;
+  final ValueNotifier<CategorySelection> categoryNotifier;
+
   final ValueNotifier<int> filterNotifier;
 
   const HomePage({
@@ -35,14 +37,20 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
+    return ValueListenableBuilder<CategorySelection>(
       valueListenable: categoryNotifier,
-      builder: (context, categoryId, _) {
+      builder: (context, selection, _) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final homeProvider = context.read<HomeProvider>();
-          if (homeProvider.categoryId != categoryId) {
-            homeProvider.changeCategory(categoryId);
-            
+
+          if (homeProvider.categoryId != selection.id ||
+              homeProvider.kieuhienthi != selection.kieuHienThi) {
+            homeProvider.changeCategory(
+              categoryId: selection.id,
+              kieuhienthi: selection.kieuHienThi,
+            );
+
+            homeProvider.fetchProducts(force: true);
           }
         });
 

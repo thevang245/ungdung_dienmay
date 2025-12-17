@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/models/category_model.dart';
+import 'package:flutter_application_1/models/category_selection.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -9,6 +10,7 @@ import 'package:http/http.dart' as http;
 class HomeProvider extends ChangeNotifier {
   bool isLoading = true;
   int categoryId = 0;
+  String kieuhienthi = '';
   List<dynamic> products = [];
   String categoryName = '';
   String idCatalogInitial = '';
@@ -31,7 +33,8 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> fetchDanhMuc() async {
     try {
-      final url = Uri.parse('${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}');
+      final url = Uri.parse(
+          '${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}');
       print("url: ${url}");
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -75,15 +78,15 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> fetchProducts({bool force = false}) async {
     print('Bắt đầu fetchProductsSmart cho category $categoryId');
+    print('Bắt đầu fetchProductsSmart cho module $kieuhienthi');
 
     final now = DateTime.now().millisecondsSinceEpoch;
-    const throttleMs = 60 * 1000; // throttle chỉ áp dụng cho API full
+    const throttleMs = 60 * 1000;
     final lastUpdateKey = '_lastUpdate_$categoryId';
 
     final prefs = await SharedPreferences.getInstance();
     final lastUpdate = prefs.getInt(lastUpdateKey) ?? 0;
 
-    // 1. Hiển thị cache ngay nếu có
     if (_cachedProducts.containsKey(categoryId) && !force) {
       products = _cachedProducts[categoryId]!;
       isLoading = false;
@@ -95,18 +98,21 @@ class HomeProvider extends ChangeNotifier {
     }
 
     try {
-    
       if (categoryId == 35001) {
         List<Map<String, dynamic>> allProductsCombined = [];
 
         for (var catId in dynamicCategoryIds) {
+          print('da goi toi ham APIService.fetchProductsByCategory');
           final modules = categoryModules[catId];
-          if (modules == null) continue;
+          if (modules == null) {
+            print('❌ Không tìm thấy modules cho categoryId = $categoryId');
+            return;
+          }
 
           final fullResponse = await APIService.fetchProductsByCategory(
-            ww2: modules[0],
-            product: modules[1],
-            extention: modules[2],
+            ww2: 'ww2',
+            product: 'module',
+            extention: kieuhienthi,
             categoryId: catId,
             idfilter: selectedFilterString,
             metaOnly: false,
@@ -126,24 +132,25 @@ class HomeProvider extends ChangeNotifier {
           allProductsCombined.addAll(mappedProducts);
         }
 
-      
         _cachedProducts[categoryId] = allProductsCombined;
         products = [...allProductsCombined];
         isLoading = false;
         notifyListeners();
         return;
       }
-
-      final modules = categoryModules[categoryId];
-      if (modules == null) return;
+      final module = ModuleResolver.resolve(kieuhienthi);
+      if (module == null) {
+        print('❌ Không tìm thấy modules cho categoryId = $categoryId');
+        return;
+      }
 
       final metaResponse = await APIService.fetchProductsByCategory(
-        ww2: modules[0],
-        product: modules[1],
-        extention: modules[2],
+        ww2: module[0],
+        extention: module[2],
+        product: module[1],
         categoryId: categoryId,
         idfilter: selectedFilterString,
-        metaOnly: true,
+        metaOnly: false,
       );
 
       final newRecordsTotal = metaResponse['recordsTotal'] ?? 0;
@@ -158,21 +165,21 @@ class HomeProvider extends ChangeNotifier {
               'Trong throttle, nhưng recordsTotal đã thay đổi → vẫn fetch full');
         }
 
-        // API full
         final fullResponse = await APIService.fetchProductsByCategory(
-            ww2: modules[0],
-            product: modules[1],
-            extention: modules[2],
-            categoryId: categoryId,
-            idfilter: selectedFilterString,
-            metaOnly: false);
+          ww2: module[0],
+          product: module[2],
+          extention: module[1],
+          categoryId: categoryId,
+          idfilter: selectedFilterString,
+          metaOnly: false,
+        );
 
         final fetched = fullResponse['data'] ?? [];
         final allProducts = fetched.map<Map<String, dynamic>>((item) {
           final casted = Map<String, dynamic>.from(item);
           return {
             ...casted,
-            'moduleType': modules[1],
+            'moduleType': module[1],
             'categoryId': categoryId,
             'categoryTitle': fullResponse['tieude'],
           };
@@ -198,19 +205,20 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  void changeCategory(int newId) async {
-    if (categoryId != newId) {
-      categoryId = newId;
+  Future<void> changeCategory({
+    required int categoryId,
+    required String kieuhienthi,
+  }) async {
+    if (this.categoryId != categoryId || this.kieuhienthi != kieuhienthi) {
+      this.categoryId = categoryId;
+      this.kieuhienthi = kieuhienthi;
 
-      // Nếu chưa có danh mục thì fetch trước
       if (danhMucData.isEmpty) {
         await fetchDanhMuc();
       }
 
-      categoryName = findCategoryNameById(danhMucData, newId);
-      print('Đã chọn danh mục: $categoryName');
-
-      fetchProducts();
+      categoryName = findCategoryNameById(danhMucData, categoryId);
+      print('📂 Đã chọn danh mục: $categoryName | kiểu: $kieuhienthi');
     }
   }
 

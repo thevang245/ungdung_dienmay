@@ -11,54 +11,62 @@ class APIService {
   static const String language = 'ashx';
   static const String loginUrl = '$baseUrl/ww2/login.${language}';
 
-  static Future<Map<String, dynamic>> fetchProductsByCategory({
-    required int categoryId,
-    required String ww2,
-    required String product,
-    required String extention,
-    required String idfilter,
-    required bool metaOnly
-  }) async {
-    late Uri uri;
+ static Future<Map<String, dynamic>> fetchProductsByCategory({
+  required int categoryId,
+  required String ww2,
+  required String product,
+  required String extention,
+  required String idfilter,
+  required bool metaOnly,
+}) async {
 
-    if (categoryId == 0) {
-      uri = Uri.parse('${baseUrl}/ww2/module.sanpham.trangchu.${language}').replace(
-        queryParameters: {'id': '35279'},
-      );
-    } else {
-      uri = Uri.parse('$baseUrl/ww2/$extention.$product.${language}?id').replace(
-        queryParameters: {
-          'id': categoryId.toString(),
-          'sl': '10',
-          'pageid': '1',
-          'idfilter': idfilter
-        },
-      );
-    }
+  late Uri uri;
 
-    print("url: ${uri}");
-    try {
-      final response = await http.get(uri);
+  if (categoryId == 0) {
+    uri = Uri.parse(
+      '$baseUrl/ww2/module.sanpham.trangchu.$language',
+    ).replace(
+      queryParameters: {'id': '35279'},
+    );
+  } else {
+    uri = Uri.parse(
+      '$baseUrl/ww2/$extention.$product.$language',
+    ).replace(
+      queryParameters: {
+        'id': categoryId.toString(),
+        'sl': '10',
+        'pageid': '1',
+        'idfilter': idfilter,
+      },
+    );
+  }
 
-      if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
+  /// 🔥 LOG NGAY KHI VÀO HÀM – CHƯA GỌI API
+  debugPrint('➡️ fetchProductsByCategory URL: $uri');
 
-        if (decoded is List && decoded.isNotEmpty && decoded[0] is Map) {
-          return decoded[
-              0]; 
-        } else {
-          print('Phản hồi không hợp lệ');
-          return {};
-        }
+  // ===== SAU DÒNG NÀY MỚI GỌI API =====
+  try {
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+
+      if (decoded is List && decoded.isNotEmpty && decoded[0] is Map) {
+        return decoded[0];
       } else {
-        print('Lỗi server: ${response.statusCode}');
+        print('⚠️ Phản hồi không hợp lệ');
         return {};
       }
-    } catch (e) {
-      print('Lỗi kết nối hoặc xử lý API: $e');
+    } else {
+      print('❌ Lỗi server: ${response.statusCode}');
       return {};
     }
+  } catch (e) {
+    print('❌ Lỗi kết nối hoặc xử lý API: $e');
+    return {};
   }
+}
+
 
   static Future<List<dynamic>> getProductRelated({
     required String id,

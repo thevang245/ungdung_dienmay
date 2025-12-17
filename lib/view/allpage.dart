@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/category_selection.dart';
 import 'package:flutter_application_1/models/order_history_model.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/provider/detailProvider.dart';
@@ -34,7 +35,9 @@ class _PageAllState extends State<PageAll> {
   String _currentPage = 'home';
   String _previousPage = 'home';
 
-  final ValueNotifier<int> categoryNotifier = ValueNotifier(35001);
+  final ValueNotifier<CategorySelection> categoryNotifier =
+      ValueNotifier(CategorySelection(35001, 'sanpham'));
+
   final ValueNotifier<int> filterNotifier = ValueNotifier(0);
   final ValueNotifier<int> cartItemCountNotifier = ValueNotifier(0);
 
@@ -56,7 +59,7 @@ class _PageAllState extends State<PageAll> {
   @override
   void initState() {
     super.initState();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final homeProvider = context.read<HomeProvider>();
       homeProvider.fetchDanhMuc().then((_) {
@@ -101,33 +104,33 @@ class _PageAllState extends State<PageAll> {
   }
 
   void _goToCartHistory() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => CarthistoryPage(
-        key: carthistoryPageKey,
-        cartitemCount: cartItemCountNotifier,
-        gotoCart: (List<int>? productIdsVuaThem) {
-          setState(() {
-            _currentPage = 'cart';
-            _currentIndex = 2;
-          });
-          cartPageKey.currentState
-              ?.chonNhieuVaMoBottomSheet(productIdsVuaThem ?? []);
-        },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CarthistoryPage(
+          key: carthistoryPageKey,
+          cartitemCount: cartItemCountNotifier,
+          gotoCart: (List<int>? productIdsVuaThem) {
+            setState(() {
+              _currentPage = 'cart';
+              _currentIndex = 2;
+            });
+            cartPageKey.currentState
+                ?.chonNhieuVaMoBottomSheet(productIdsVuaThem ?? []);
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  void _goHome({int? newCategoryId}) {
+  void _goHome({CategorySelection? newCategory}) {
     setState(() {
       _currentPage = 'home';
       _currentIndex = 0;
       _previousPage = 'home';
-      if (newCategoryId != null) {
-        categoryNotifier.value = newCategoryId;
+
+      if (newCategory != null) {
+        categoryNotifier.value = newCategory;
       }
     });
   }
@@ -136,9 +139,10 @@ class _PageAllState extends State<PageAll> {
     switch (_currentIndex) {
       case 0:
         return HomePage(
-          categoryNotifier: categoryNotifier,
-          filterNotifier: filterNotifier,
-        );
+  categoryNotifier: categoryNotifier, 
+  filterNotifier: filterNotifier,
+);
+
       case 1:
         return _favouritePage ??= favouritePage(
           key: favouritePageKey,
@@ -171,14 +175,15 @@ class _PageAllState extends State<PageAll> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        drawer: DanhMucDrawer(onCategorySelected: (int id) async {
+        drawer: DanhMucDrawer(
+            onCategorySelected: (int id, String kieuhienthi) async {
           print('id danh muc: $id');
           await Navigator.of(context).maybePop();
           setState(() {
             _currentPage = 'home';
             _currentIndex = 0;
             _searchController.clear();
-            categoryNotifier.value = id;
+            categoryNotifier.value = CategorySelection(id, kieuhienthi);
           });
         }),
         appBar: PreferredSize(
@@ -205,3 +210,4 @@ class _PageAllState extends State<PageAll> {
     );
   }
 }
+

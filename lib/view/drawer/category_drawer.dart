@@ -6,17 +6,20 @@ import 'package:flutter_application_1/widgets/widget_auth.dart';
 import 'package:http/http.dart' as http;
 
 class DanhMucDrawer extends StatelessWidget {
-  final void Function(int) onCategorySelected;
+  final void Function(int categoryID, String kieuhienthi) onCategorySelected;
   DanhMucDrawer({required this.onCategorySelected});
-  
+
   Future<List<dynamic>> fetchDanhMuc() async {
-    final response = await http.get(Uri.parse(
-        '${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}'));
-        print(response);
+    final String url =
+        '${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}';
+    final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      return json[0]['data'] ?? [];
+      print('Dữ liệu danh mục: $json');
+      return json;
     } else {
+      print('Lỗi fetchDanhMuc - statusCode: ${response.statusCode}');
       throw Exception('Không thể tải danh mục');
     }
   }
@@ -34,9 +37,7 @@ class DanhMucDrawer extends StatelessWidget {
             Container(
               height: appBarHeight,
               width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: gradientBackground
-              ),
+              decoration: BoxDecoration(gradient: gradientBackground),
               child: Stack(
                 children: [
                   Center(
@@ -74,47 +75,42 @@ class DanhMucDrawer extends StatelessWidget {
                   return ListView(
                     padding: const EdgeInsets.all(8),
                     children: [
-                      ...danhMucList.map((item) {
-                        final id = item['id'];
-                        final title = item['tieude'];
-                        final children = item['children'] ?? [];
+                      ...danhMucList.map<Widget>((item) {
+                        final int id =
+                            int.tryParse(item['idpart'].toString()) ?? 0;
+                        final String kieuhienthi = item['kieuhienthi'] ?? '';
+                        final String title = item['tieude'] ?? '';
+                        final List children =
+                            item['menucap1'] is List ? item['menucap1'] : [];
 
                         if (children.isEmpty) {
                           return ListTile(
-                            title: Text(title ?? ''),
+                            title: Text(title),
                             onTap: () {
-                              onCategorySelected(
-                                  int.tryParse(id.toString()) ?? 0);
-                              Navigator.of(context).pop();
+                              onCategorySelected(id, kieuhienthi);
+                              Navigator.pop(context);
                             },
                           );
-                        } else {
-                          return ExpansionTile(
-                            title: InkWell(
+                        }
+
+                        return ExpansionTile(
+                          title: Text(title),
+                          children: children.map<Widget>((subItem) {
+                            final int subID =
+                                int.tryParse(subItem['idpart'].toString()) ?? 0;
+                            return ListTile(
+                              title: Text(subItem['tieude'] ?? ''),
                               onTap: () {
                                 onCategorySelected(
-                                    int.tryParse(id.toString()) ?? 0);
-                                Navigator.of(context).pop();
+                                    id == 0 ? subID : subID, kieuhienthi);
+                                Navigator.pop(context);
                               },
-                              child: Text(title ?? '',
-                                  ),
-                            ),
-                            children: children.map<Widget>((subItem) {
-                              return ListTile(
-                                title: Text(subItem['tieude'] ?? ''),
-                                onTap: () {
-                                  final id = subItem['id'];
-                                  onCategorySelected(
-                                      int.tryParse(id.toString()) ?? 0);
-                                  Navigator.of(context).pop();
-                                },
-                              );
-                            }).toList(),
-                          );
-                        }
-                      }),
+                            );
+                          }).toList(),
+                        );
+                      }).toList(),
                       const SizedBox(height: 24),
-                      Divider(thickness: 1),
+                      const Divider(thickness: 1),
                       const SizedBox(height: 12),
                       _buildCompanyInfo(),
                     ],
