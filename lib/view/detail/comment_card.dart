@@ -1,82 +1,132 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/comments_model.dart';
+import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
-class CommentCard extends StatelessWidget {
-  final String name;
-  final String content;
+class CommentListWidget extends StatefulWidget {
+  final int postId;
 
-  const CommentCard({
-    super.key,
-    required this.name,
-    required this.content,
-  });
+  const CommentListWidget({super.key, required this.postId});
 
-  void _showFullComment(BuildContext context) {
-    showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (_) => AlertDialog(
-        title: Text(name, style: TextStyle(color: Color(0xff0066FF))),
-        content: SingleChildScrollView(
-          child: Text(content, style: TextStyle(fontSize: 16)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text("Đóng", style: TextStyle(color: Colors.black)),
-          ),
-        ],
-      ),
-    );
+  @override
+  State<CommentListWidget> createState() => _CommentListWidgetState();
+}
+
+class _CommentListWidgetState extends State<CommentListWidget> {
+  late Future<List<Comment>> futureComments;
+
+  @override
+  void initState() {
+    super.initState();
+    futureComments = loadComments();
+  }
+
+  Future<List<Comment>> loadComments() async {
+    try {
+      final comments = await APIService.fetchComments(widget.postId);
+      return comments;
+    } catch (e) {
+      print('Error loading comments: $e');
+      return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final maxLength = 160;
-    final isLong = content.length > maxLength;
-    final shortContent = isLong ? content.substring(0, maxLength) : content;
-
-    return InkWell(
-      onTap: isLong ? () => _showFullComment(context) : null,
-      child: Container(
-        width: 280,
-        margin: EdgeInsets.only(right: 12),
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(blurRadius: 5, color: Colors.grey.shade300)],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              name,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Color(0xff0066FF),
-              ),
-            ),
-            SizedBox(height: 8),
-            isLong
-                ? RichText(
-                    text: TextSpan(
-                      style: TextStyle(fontSize: 15, color: Colors.black),
-                      children: [
-                        TextSpan(text: "$shortContent... "),
-                        TextSpan(
-                          text: "Xem thêm",
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            
-                          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FutureBuilder<List<Comment>>(
+            future: futureComments,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Lỗi: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('Chưa có bình luận nào'));
+              } else {
+                final comments = snapshot.data!;
+                return Column(
+                  children: comments.map((c) {
+                    return Card(
+                      elevation: 0,
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                  'https://vangtran.125.atoz.vn${c.avatar}'),
+                              radius: 25,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        c.name,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                      Text(
+                                        '${c.time.day}/${c.time.month}/${c.time.year} ${c.time.hour}:${c.time.minute}',
+                                        style: const TextStyle(
+                                            color: Colors.grey, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  RatingBarIndicator(
+                                    rating: c.rating.toDouble(),
+                                    itemBuilder: (context, index) => const Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                    ),
+                                    itemCount: 5,
+                                    itemSize: 20,
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(c.content),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets
+                                          .only(top: 5), 
+                                      minimumSize: Size(
+                                          0, 0),
+                                      tapTargetSize: MaterialTapTargetSize
+                                          .shrinkWrap, 
+                                    ),
+                                    onPressed: () {},
+                                    child: const Text(
+                                      'Trả lời',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  )
-                : Text(content, style: TextStyle(fontSize: 15)),
-          ],
-        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

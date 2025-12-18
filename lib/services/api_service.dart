@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/comments_model.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 import 'package:http/http.dart' as http;
@@ -13,61 +14,58 @@ class APIService {
   static const String type2 = 'ww2';
   static const String loginUrl = '$baseUrl/${type2}/login.${language}';
 
- static Future<Map<String, dynamic>> fetchProductsByCategory({
-  required int categoryId,
-  required String ww2,
-  required String product,
-  required String extention,
-  required String idfilter,
-  required bool metaOnly,
-}) async {
+  static Future<Map<String, dynamic>> fetchProductsByCategory({
+    required int categoryId,
+    required String ww2,
+    required String product,
+    required String extention,
+    required String idfilter,
+    required bool metaOnly,
+  }) async {
+    late Uri uri;
 
-  late Uri uri;
+    if (categoryId == 0) {
+      uri = Uri.parse(
+        '$baseUrl/${type2}/module.sanpham.trangchu.$language',
+      ).replace(
+        queryParameters: {'id': '35279'},
+      );
+    } else {
+      uri = Uri.parse(
+        '$baseUrl/${type2}/$extention.$product.$language',
+      ).replace(
+        queryParameters: {
+          'id': categoryId.toString(),
+          'sl': '10',
+          'pageid': '1',
+          'idfilter': idfilter,
+        },
+      );
+    }
 
-  if (categoryId == 0) {
-    uri = Uri.parse(
-      '$baseUrl/${type2}/module.sanpham.trangchu.$language',
-    ).replace(
-      queryParameters: {'id': '35279'},
-    );
-  } else {
-    uri = Uri.parse(
-      '$baseUrl/${type2}/$extention.$product.$language',
-    ).replace(
-      queryParameters: {
-        'id': categoryId.toString(),
-        'sl': '10',
-        'pageid': '1',
-        'idfilter': idfilter,
-      },
-    );
-  }
+    print("url lay san pham: $uri");
 
-  print("url lay san pham: $uri");
+    try {
+      final response = await http.get(uri);
 
- 
-  try {
-    final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
 
-    if (response.statusCode == 200) {
-      final decoded = json.decode(response.body);
-
-      if (decoded is List && decoded.isNotEmpty && decoded[0] is Map) {
-        return decoded[0];
+        if (decoded is List && decoded.isNotEmpty && decoded[0] is Map) {
+          return decoded[0];
+        } else {
+          print('Phản hồi không hợp lệ');
+          return {};
+        }
       } else {
-        print('Phản hồi không hợp lệ');
+        print('Lỗi server: ${response.statusCode}');
         return {};
       }
-    } else {
-      print('Lỗi server: ${response.statusCode}');
+    } catch (e) {
+      print('Lỗi kết nối hoặc xử lý API: $e');
       return {};
     }
-  } catch (e) {
-    print('Lỗi kết nối hoặc xử lý API: $e');
-    return {};
   }
-}
-
 
   static Future<List<dynamic>> getProductRelated({
     required String id,
@@ -199,7 +197,8 @@ class APIService {
     }
   }
 
-  static Future<Map<String, dynamic>> getBoLocByCatalog(String idCatalog) async {
+  static Future<Map<String, dynamic>> getBoLocByCatalog(
+      String idCatalog) async {
     final uri = Uri.parse('$baseUrl/${type2}/getfilter?IDCatalog=$idCatalog');
 
     try {
@@ -311,4 +310,25 @@ class APIService {
   //     return [];
   //   }
   // }
+
+  static Future<List<Comment>> fetchComments(int id) async {
+  final url = Uri.parse('${baseUrl}/${type2}/binhluan.pc.${language}?id=$id');
+  print('Fetching comments from: $url');
+
+  try {
+    final response = await http.get(url);
+    final responseData = json.decode(response.body);
+
+    if (responseData is List && responseData.isNotEmpty) {
+      final firstElement = responseData[0] as Map<String, dynamic>;
+      final commentList = firstElement['data'] as List<dynamic>;
+      return commentList.map((e) => Comment.fromJson(e)).toList();
+    }
+    return [];
+  } catch (e) {
+    print('Error fetching comments: $e');
+    return [];
+  }
+}
+
 }

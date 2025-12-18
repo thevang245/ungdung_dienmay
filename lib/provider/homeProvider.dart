@@ -156,7 +156,6 @@ class HomeProvider extends ChangeNotifier {
       final newRecordsTotal = metaResponse['recordsTotal'] ?? 0;
       final oldRecordsTotal = _cachedRecordsTotal[categoryId];
 
-      // 3. Nếu force hoặc recordsTotal khác hoặc chưa có cache → fetch full
       if (force ||
           oldRecordsTotal == null ||
           oldRecordsTotal != newRecordsTotal) {

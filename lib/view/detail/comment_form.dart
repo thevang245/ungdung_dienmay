@@ -20,17 +20,7 @@ class _CommentFormState extends State<CommentForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Text(
-              'Bình luận nhận xét',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
+          
          
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

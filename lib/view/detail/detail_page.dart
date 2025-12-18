@@ -227,64 +227,70 @@ class DetailPageState extends State<DetailPage> {
                       },
                     ),
                     if (_productsRelated.isNotEmpty) ...[
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 12),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50], // Nền xám nhạt
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                              child: Text(
-                                model.toLowerCase() == 'tintuc'
-                                    ? 'Tin tức liên quan'
-                                    : 'Sản phẩm liên quan',
-                                style: TextStyle(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 8),
+                            child: Text(
+                              model.toLowerCase() == 'tintuc'
+                                  ? 'Tin tức liên quan'
+                                  : 'Sản phẩm liên quan',
+                              style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
+                                  color: Colors.black),
                             ),
-                            model.toLowerCase() == 'tintuc'
-                                ? ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    scrollDirection: Axis.vertical,
+                          ),
+                          model.toLowerCase() == 'tintuc'
+                              ? ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: _productsRelated.length,
+                                  itemBuilder: (context, index) {
+                                    final item = _productsRelated[index];
+                                    return RelatedNewsCard(
+                                      model: model,
+                                      product: item,
+                                      categoryNotifier: widget.categoryNotifier,
+                                    );
+                                  },
+                                )
+                              : SizedBox(
+                                  height: 220,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
                                     itemCount: _productsRelated.length,
                                     itemBuilder: (context, index) {
                                       final item = _productsRelated[index];
-                                      return RelatedNewsCard(
+                                      return RelatedProductCard(
                                         model: model,
                                         product: item,
                                         categoryNotifier:
                                             widget.categoryNotifier,
                                       );
                                     },
-                                  )
-                                : SizedBox(
-                                    height: 220,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: _productsRelated.length,
-                                      itemBuilder: (context, index) {
-                                        final item = _productsRelated[index];
-                                        return RelatedProductCard(
-                                          model: model,
-                                          product: item,
-                                          categoryNotifier:
-                                              widget.categoryNotifier,
-                                        );
-                                      },
-                                    ),
                                   ),
-                            CommentForm()
-                          ],
-                        ),
+                                ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 8),
+                            child: Text(
+                              'Bình luận nhận xét',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          CommentListWidget(
+                            postId: int.tryParse(widget.productId) ?? 0,
+                          ),
+                          CommentForm(),
+                        ],
                       ),
                     ],
                   ],
