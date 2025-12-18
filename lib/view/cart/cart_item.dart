@@ -61,7 +61,7 @@ class _ItemCartState extends State<ItemCart> {
     return InkWell(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPage(
-          modelType: widget.item.moduleType,
+          modelType: 'sanpham',
           productId: widget.item.id.toString(), categoryNotifier: ValueNotifier<int>(1), cartitemCount: widget.cartitemCount),));
       },
       child: Padding(

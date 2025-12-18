@@ -48,6 +48,7 @@ class HomePage extends StatelessWidget {
             homeProvider.changeCategory(
               categoryId: selection.id,
               kieuhienthi: selection.kieuHienThi,
+              category: selection.title
             );
 
             homeProvider.fetchProducts(force: true);

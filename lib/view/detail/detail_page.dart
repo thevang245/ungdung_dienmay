@@ -9,6 +9,7 @@ import 'package:flutter_application_1/view/cart/cart_page.dart';
 import 'package:flutter_application_1/view/components/bottom_appbar.dart';
 import 'package:flutter_application_1/view/detail/comment_card.dart';
 import 'package:flutter_application_1/view/detail/bottom_bar.dart';
+import 'package:flutter_application_1/view/detail/comment_form.dart';
 import 'package:flutter_application_1/view/detail/detail_description.dart';
 import 'package:flutter_application_1/view/detail/detail_imggallery.dart';
 import 'package:flutter_application_1/view/detail/detail_pricetitle.dart';
@@ -162,7 +163,7 @@ class DetailPageState extends State<DetailPage> {
     final product = productDetail ?? {};
     final hinhAnhs = getDanhSachHinh(product);
     final String title = product['tieude'] ?? 'Sản phẩm chưa có tên';
-    final String price = product['gia'] ?? 'Chưa có giá';
+    final String price = product['gia'].toString() ?? 'Chưa có giá';
     final String description = (product['noidungchitiet'] ?? 'Không có mô tả')
         .replaceAll("''", '"'); // Chuyển '' => "
 
@@ -171,8 +172,8 @@ class DetailPageState extends State<DetailPage> {
       body: Stack(
         children: [
           Padding(
-            padding:
-                EdgeInsets.only(bottom: model == 'sanpham' ? 55 : 0, top: 0),
+            padding: EdgeInsets.only(
+                bottom: model.toLowerCase() == 'sanpham' ? 55 : 0, top: 0),
             child: NotificationListener<ScrollNotification>(
               onNotification: (_) => true,
               child: SingleChildScrollView(
@@ -180,7 +181,7 @@ class DetailPageState extends State<DetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 60), // để trống phần appbar
+                    const SizedBox(height: 60),
                     if (hinhAnhs.isNotEmpty)
                       DetailImageGallery(
                         images: hinhAnhs,
@@ -194,7 +195,7 @@ class DetailPageState extends State<DetailPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (model == 'sanpham')
+                          if (model.toLowerCase() == 'sanpham')
                             Text(
                               '${formatCurrency(price)}đ',
                               style: const TextStyle(
@@ -239,7 +240,7 @@ class DetailPageState extends State<DetailPage> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 8),
                               child: Text(
-                                model == 'tintuc'
+                                model.toLowerCase() == 'tintuc'
                                     ? 'Tin tức liên quan'
                                     : 'Sản phẩm liên quan',
                                 style: TextStyle(
@@ -249,7 +250,7 @@ class DetailPageState extends State<DetailPage> {
                                 ),
                               ),
                             ),
-                            model == 'tintuc'
+                            model.toLowerCase() == 'tintuc'
                                 ? ListView.builder(
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
@@ -260,7 +261,8 @@ class DetailPageState extends State<DetailPage> {
                                       return RelatedNewsCard(
                                         model: model,
                                         product: item,
-                                        categoryNotifier: widget.categoryNotifier,
+                                        categoryNotifier:
+                                            widget.categoryNotifier,
                                       );
                                     },
                                   )
@@ -274,11 +276,13 @@ class DetailPageState extends State<DetailPage> {
                                         return RelatedProductCard(
                                           model: model,
                                           product: item,
-                                          categoryNotifier: widget.categoryNotifier,
+                                          categoryNotifier:
+                                              widget.categoryNotifier,
                                         );
                                       },
                                     ),
                                   ),
+                            CommentForm()
                           ],
                         ),
                       ),
@@ -363,13 +367,13 @@ class DetailPageState extends State<DetailPage> {
               ),
             ),
           ),
-          if (model == 'sanpham' &&
+          if (model.toLowerCase() == 'sanpham' &&
               (productDetail?['gia'] ?? '').toString().trim().isNotEmpty &&
               hinhAnhs.isNotEmpty)
             BottomActionBar(
               moduleType: moduleType,
               tieude: product['tieude'],
-              gia: product['gia'],
+              gia: product['gia']?.toString() ?? '',
               hinhdaidien: product['hinhdaidien'],
               productId: int.tryParse(widget.productId) ?? 0,
               userId: Global.email,

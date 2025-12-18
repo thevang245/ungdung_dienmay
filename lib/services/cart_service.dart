@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_application_1/models/product_model.dart';
+import 'package:flutter_application_1/view/components/product_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
@@ -7,20 +8,17 @@ import 'package:http/http.dart' as http;
 
 class APICartService {
   static Future<String?> addToCart({
-    required String emailAddress,
-    required String password,
     required int productId,
     required int quantity,
     required String moduleType,
     required ValueNotifier<int> cartitemCount,
   }) async {
-    final uri = Uri.parse('${APIService.baseUrl}/api/add.product.php');
+    final uri = Uri.parse(
+        '${APIService.baseUrl}/${APIService.type1}/addgiohang.${APIService.language}?IDPart=$productId&id=1383');
+    print('URL thêm giỏ hàng: $uri');
 
     final bodyData = {
-      'ProductID': productId,
-      'Quantity': quantity,
-      'EmailAddress': emailAddress,
-      'ModuleType': moduleType,
+      'sl': quantity,
     };
 
     try {
@@ -29,14 +27,17 @@ class APICartService {
         headers: {'Content-Type': 'application/json'},
         body: json.encode(bodyData),
       );
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        if (responseData['success'] == true) {
+
+        if (responseData['thongbao'] != null) {
           cartitemCount.value += quantity;
+          print('Thêm vào giỏ hàng thành công: ${responseData}');
           return null;
         } else {
-          print('API trả về lỗi: ${responseData['message']}');
-          return responseData['message'] ?? 'Thêm vào giỏ hàng thất bại';
+          print('API trả về lỗi, dữ liệu: $responseData');
+          return 'Thêm vào giỏ hàng thất bại';
         }
       } else {
         print('Lỗi máy chủ: ${response.statusCode}');
@@ -54,7 +55,7 @@ class APICartService {
     required int newQuantity,
   }) async {
     final uri = Uri.parse(
-      '${APIService.baseUrl}/api/update.quantity.php',
+      '${APIService.baseUrl}/${APIService.type1}/update.quantity.${APIService.language}',
     );
 
     try {
@@ -89,7 +90,8 @@ class APICartService {
   static Future<List<CartItemModel>> fetchCartItemsById({
     required String emailAddress,
   }) async {
-    final uri = Uri.parse('${APIService.baseUrl}/api/get.cart.php');
+    final uri = Uri.parse(
+        '${APIService.baseUrl}/${APIService.type1}/get.cart.${APIService.language}');
 
     try {
       final response = await http.post(
@@ -147,7 +149,7 @@ class APICartService {
     required ValueNotifier<int> cartitemCount,
   }) async {
     final uri = Uri.parse(
-      '${APIService.baseUrl}/api/remove.product.php',
+      '${APIService.baseUrl}/${APIService.type1}/remove.product.${APIService.language}',
     );
 
     try {
@@ -181,15 +183,21 @@ class APICartService {
   }
 
   static Future<void> datHang({
-    required String moduletype, required String customerName,
-    required String email, required String tel,
-    required String address, required double totalPrice,
+    required String moduletype,
+    required String customerName,
+    required String email,
+    required String tel,
+    required String address,
+    required double totalPrice,
     required List<CartItemModel> items,
   }) async {
-    final url = Uri.parse('${APIService.baseUrl}/api/order.php');
+    final url = Uri.parse(
+        '${APIService.baseUrl}/${APIService.type1}/order.${APIService.language}');
     final body = {
-      'customer_name': customerName, 'email': email,
-      'tel': tel, 'address': address,
+      'customer_name': customerName,
+      'email': email,
+      'tel': tel,
+      'address': address,
       'total_price': totalPrice.toString(),
       'items': items
           .map((item) => {
@@ -220,7 +228,8 @@ class APICartService {
     required String orderId,
     required String emailAddress,
   }) async {
-    final uri = Uri.parse('${APIService.baseUrl}/api/cancel.order.php');
+    final uri = Uri.parse(
+        '${APIService.baseUrl}/${APIService.type1}/cancel.order.${APIService.language}');
 
     final bodyData = {
       'IDBG': orderId,
@@ -255,7 +264,8 @@ class APICartService {
 
   static Future<int> getCartItemCountFromApi(String email) async {
     final response = await http.post(
-      Uri.parse('${APIService.baseUrl}/api/get.total.quantity.php'),
+      Uri.parse(
+          '${APIService.baseUrl}/${APIService.type1}/get.total.quantity.${APIService.language}'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email}),
     );

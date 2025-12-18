@@ -19,6 +19,7 @@ class Homecontent extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeProvider = context.watch<HomeProvider>();
     final int categoryId = homeProvider.categoryId;
+    final String kieuhienthi = homeProvider.kieuhienthi;
     final bool isLoading = homeProvider.isLoading;
     final List<dynamic> products = homeProvider.products;
     final Map<String, dynamic> danhMucData = homeProvider.danhMucData;
@@ -51,7 +52,7 @@ class Homecontent extends StatelessWidget {
           final product = items[index];
           return singleColumnCategories.contains(categoryId)
               ? NewsCard(product: product, categoryId: categoryId)
-              : ProductCard(product: product, categoryId: categoryId);
+              : ProductCard(product: product, categoryId: categoryId, kieuhienthi: kieuhienthi,);
         },
       );
     }
@@ -106,7 +107,7 @@ class Homecontent extends StatelessWidget {
                   final product = productList[index];
                   return singleColumnCategories.contains(catId)
                       ? NewsCard(product: product, categoryId: catId)
-                      : ProductCard(product: product, categoryId: catId);
+                      : ProductCard(product: product, categoryId: catId, kieuhienthi: kieuhienthi);
                 },
               ),
             ],

@@ -9,7 +9,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 class APIService {
   static const String baseUrl = 'https://vangtran.125.atoz.vn';
   static const String language = 'ashx';
-  static const String loginUrl = '$baseUrl/ww2/login.${language}';
+  static const String type1 = 'ww1';
+  static const String type2 = 'ww2';
+  static const String loginUrl = '$baseUrl/${type2}/login.${language}';
 
  static Future<Map<String, dynamic>> fetchProductsByCategory({
   required int categoryId,
@@ -24,13 +26,13 @@ class APIService {
 
   if (categoryId == 0) {
     uri = Uri.parse(
-      '$baseUrl/ww2/module.sanpham.trangchu.$language',
+      '$baseUrl/${type2}/module.sanpham.trangchu.$language',
     ).replace(
       queryParameters: {'id': '35279'},
     );
   } else {
     uri = Uri.parse(
-      '$baseUrl/ww2/$extention.$product.$language',
+      '$baseUrl/${type2}/$extention.$product.$language',
     ).replace(
       queryParameters: {
         'id': categoryId.toString(),
@@ -41,10 +43,9 @@ class APIService {
     );
   }
 
-  /// 🔥 LOG NGAY KHI VÀO HÀM – CHƯA GỌI API
-  debugPrint('➡️ fetchProductsByCategory URL: $uri');
+  print("url lay san pham: $uri");
 
-  // ===== SAU DÒNG NÀY MỚI GỌI API =====
+ 
   try {
     final response = await http.get(uri);
 
@@ -54,15 +55,15 @@ class APIService {
       if (decoded is List && decoded.isNotEmpty && decoded[0] is Map) {
         return decoded[0];
       } else {
-        print('⚠️ Phản hồi không hợp lệ');
+        print('Phản hồi không hợp lệ');
         return {};
       }
     } else {
-      print('❌ Lỗi server: ${response.statusCode}');
+      print('Lỗi server: ${response.statusCode}');
       return {};
     }
   } catch (e) {
-    print('❌ Lỗi kết nối hoặc xử lý API: $e');
+    print('Lỗi kết nối hoặc xử lý API: $e');
     return {};
   }
 }
@@ -76,7 +77,7 @@ class APIService {
   }) async {
     try {
       final uri = Uri.parse(
-        '$baseUrl/ww2/module.$modelType.chitiet.lienquan.${language}',
+        '$baseUrl/${type2}/module.$modelType.chitiet.lienquan.${language}',
       ).replace(
         queryParameters: {
           'id': id,
@@ -120,7 +121,7 @@ class APIService {
   }
 
   static Future<List<dynamic>> loadComments() async {
-    final uri = Uri.parse('$baseUrl/ww2/module.tintuc.asp').replace(
+    final uri = Uri.parse('$baseUrl/${type2}/module.tintuc.asp').replace(
       queryParameters: {
         'id': '35281',
       },
@@ -156,7 +157,7 @@ class APIService {
 
   static Future<List<Map<String, dynamic>>> searchSanPham(
       String keyword) async {
-    final uri = Uri.parse('${baseUrl}/ww2/search.sanpham.${language}');
+    final uri = Uri.parse('${baseUrl}/${type2}/search.sanpham.${language}');
     try {
       final response = await http.post(
         uri,
@@ -199,7 +200,7 @@ class APIService {
   }
 
   static Future<Map<String, dynamic>> getBoLocByCatalog(String idCatalog) async {
-    final uri = Uri.parse('$baseUrl/ww2/getfilter?IDCatalog=$idCatalog');
+    final uri = Uri.parse('$baseUrl/${type2}/getfilter?IDCatalog=$idCatalog');
 
     try {
       final response = await http.get(uri);
@@ -217,7 +218,7 @@ class APIService {
   }
 
   static Future<List<dynamic>> fetchBoLocChiTiet(String id) async {
-    final url = Uri.parse('$baseUrl/ww2/getfilter?IDCatalog=$id');
+    final url = Uri.parse('$baseUrl/${type2}/getfilter?IDCatalog=$id');
 
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
@@ -239,7 +240,7 @@ class APIService {
       Function(List<String>) getDanhSachHinh) async {
     final int productIdInt = int.tryParse(productId) ?? 0;
     final String url =
-        '$baseUrl/ww2/module.$danhmuc.chitiet.${language}?id=$productIdInt';
+        '$baseUrl/${type2}/module.$danhmuc.chitiet.${language}?id=$productIdInt';
     print('Fetching product details from: $url');
 
     try {
@@ -285,7 +286,7 @@ class APIService {
 
   // static Future<List<dynamic>> fetchFilteredProducts() async {
   //   final url = Uri.parse(
-  //     '$baseUrl/ww2/module.laytimkiem.asp?id=&id2=&id3=,n12229,n12239&pageid=1',
+  //     '$baseUrl/${type2}/module.laytimkiem.asp?id=&id2=&id3=,n12229,n12239&pageid=1',
   //   );
 
   //   print("url filter: $url");

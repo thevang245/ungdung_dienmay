@@ -6,10 +6,11 @@ import 'package:flutter_application_1/view/until/until.dart';
 class ProductCard extends StatelessWidget {
   final dynamic product;
   final int categoryId;
+  final String kieuhienthi;
   final VoidCallback? onTap;
 
   const ProductCard(
-      {super.key, required this.product, required this.categoryId, this.onTap});
+      {super.key, required this.product, required this.categoryId,required this.kieuhienthi, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,8 @@ class ProductCard extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (_) => DetailPage(
-                      productId: product['id'].toString(),
+                  modelType: kieuhienthi,
+                      productId: product['id']?.toString() ?? '',
                       categoryNotifier: ValueNotifier<int>(categoryId),
                       cartitemCount: ValueNotifier<int>(1),
                     )));

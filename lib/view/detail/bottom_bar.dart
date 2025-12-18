@@ -56,8 +56,6 @@ class BottomActionBar extends StatelessWidget {
                     print('emailaddress: ${Global.email}');
                     final result = await APICartService.addToCart(
                         moduleType: moduleType,
-                        emailAddress: Global.email,
-                        password: passwordHash,
                         productId: productId,
                         cartitemCount: cartitemCount,
                         quantity: 1);
@@ -103,8 +101,6 @@ class BottomActionBar extends StatelessWidget {
                 onPressed: () async {
                   await APICartService.addToCart(
                       moduleType: moduleType,
-                      emailAddress: userId,
-                      password: Global.pass,
                       productId: productId as int,
                       cartitemCount: cartitemCount,
                       quantity: 1);

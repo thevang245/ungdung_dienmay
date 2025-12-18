@@ -6,7 +6,7 @@ import 'package:flutter_application_1/widgets/widget_auth.dart';
 import 'package:http/http.dart' as http;
 
 class DanhMucDrawer extends StatelessWidget {
-  final void Function(int categoryID, String kieuhienthi) onCategorySelected;
+  final void Function(int categoryID, String kieuhienthi, String tieude) onCategorySelected;
   DanhMucDrawer({required this.onCategorySelected});
 
   Future<List<dynamic>> fetchDanhMuc() async {
@@ -87,7 +87,7 @@ class DanhMucDrawer extends StatelessWidget {
                           return ListTile(
                             title: Text(title),
                             onTap: () {
-                              onCategorySelected(id, kieuhienthi);
+                              onCategorySelected(id, kieuhienthi, title);
                               Navigator.pop(context);
                             },
                           );
@@ -98,11 +98,12 @@ class DanhMucDrawer extends StatelessWidget {
                           children: children.map<Widget>((subItem) {
                             final int subID =
                                 int.tryParse(subItem['idpart'].toString()) ?? 0;
+                            final String title = subItem['tieude'] ?? '';
                             return ListTile(
-                              title: Text(subItem['tieude'] ?? ''),
+                              title: Text(title ?? ''),
                               onTap: () {
                                 onCategorySelected(
-                                    id == 0 ? subID : subID, kieuhienthi);
+                                    id == 0 ? subID : subID, kieuhienthi,title );
                                 Navigator.pop(context);
                               },
                             );

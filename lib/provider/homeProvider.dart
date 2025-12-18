@@ -60,7 +60,7 @@ class HomeProvider extends ChangeNotifier {
       {bool parentOnly = true}) {
     for (var entry in data.entries) {
       final value = entry.value;
-      if (value is Map && int.tryParse(value['id'].toString()) == id) {
+      if (value is Map && int.tryParse(value['idpart'].toString()) == id) {
         return value['tieude'] ?? '';
       }
       if (value is Map && value['children'] is List) {
@@ -208,16 +208,18 @@ class HomeProvider extends ChangeNotifier {
   Future<void> changeCategory({
     required int categoryId,
     required String kieuhienthi,
+    required String category
   }) async {
     if (this.categoryId != categoryId || this.kieuhienthi != kieuhienthi) {
       this.categoryId = categoryId;
       this.kieuhienthi = kieuhienthi;
+    
 
       if (danhMucData.isEmpty) {
         await fetchDanhMuc();
       }
 
-      categoryName = findCategoryNameById(danhMucData, categoryId);
+      categoryName = category;
       print('📂 Đã chọn danh mục: $categoryName | kiểu: $kieuhienthi');
     }
   }

@@ -1,8 +1,8 @@
 class CategorySelection {
   final int id;
   final String kieuHienThi;
-
-  CategorySelection(this.id, this.kieuHienThi);
+  final String title;
+  CategorySelection(this.id, this.kieuHienThi, this.title);
 }
 
 class ModuleResolver {

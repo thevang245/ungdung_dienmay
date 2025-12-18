@@ -36,7 +36,7 @@ class _PageAllState extends State<PageAll> {
   String _previousPage = 'home';
 
   final ValueNotifier<CategorySelection> categoryNotifier =
-      ValueNotifier(CategorySelection(35001, 'sanpham'));
+      ValueNotifier(CategorySelection(60711, 'sanpham', 'Trang chủ'));
 
   final ValueNotifier<int> filterNotifier = ValueNotifier(0);
   final ValueNotifier<int> cartItemCountNotifier = ValueNotifier(0);
@@ -139,9 +139,9 @@ class _PageAllState extends State<PageAll> {
     switch (_currentIndex) {
       case 0:
         return HomePage(
-  categoryNotifier: categoryNotifier, 
-  filterNotifier: filterNotifier,
-);
+          categoryNotifier: categoryNotifier,
+          filterNotifier: filterNotifier,
+        );
 
       case 1:
         return _favouritePage ??= favouritePage(
@@ -176,14 +176,14 @@ class _PageAllState extends State<PageAll> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         drawer: DanhMucDrawer(
-            onCategorySelected: (int id, String kieuhienthi) async {
+            onCategorySelected: (int id, String kieuhienthi, String tieude) async {
           print('id danh muc: $id');
           await Navigator.of(context).maybePop();
           setState(() {
             _currentPage = 'home';
             _currentIndex = 0;
             _searchController.clear();
-            categoryNotifier.value = CategorySelection(id, kieuhienthi);
+            categoryNotifier.value = CategorySelection(id, kieuhienthi, tieude);
           });
         }),
         appBar: PreferredSize(
@@ -210,4 +210,3 @@ class _PageAllState extends State<PageAll> {
     );
   }
 }
-

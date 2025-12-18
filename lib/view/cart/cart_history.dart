@@ -203,9 +203,7 @@ class CarthistoryPageState extends State<CarthistoryPage>
                             break;
                           }
                           final error = await APICartService.addToCart(
-                            moduleType: 'sanpham',
-                            emailAddress: Global.email,
-                            password: Global.pass,
+                            moduleType: 'sanpham',                   
                             productId: productId,
                             cartitemCount: widget.cartitemCount,
                             quantity: item.quantity ?? 1,

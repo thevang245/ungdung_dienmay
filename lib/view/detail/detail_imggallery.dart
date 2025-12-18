@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/view/detail/img_expand.dart'; // Thay import sang file mới
 
 class DetailImageGallery extends StatefulWidget {
@@ -70,7 +71,7 @@ class _DetailImageGalleryState extends State<DetailImageGallery> {
                       );
                     },
                     child: Image.network(
-                      widget.images[index],
+                      '${APIService.baseUrl}${widget.images[index]}',
                       width: double.infinity,
                       fit: BoxFit.contain,
                     ),
@@ -116,7 +117,7 @@ class _DetailImageGalleryState extends State<DetailImageGallery> {
                     ),
                   ),
                   child: Image.network(
-                    widget.images[index],
+                   '${APIService.baseUrl}${widget.images[index]}',
                     width: 80,
                     height: 50,
                     fit: BoxFit.contain,
