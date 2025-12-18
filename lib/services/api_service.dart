@@ -312,23 +312,32 @@ class APIService {
   // }
 
   static Future<List<Comment>> fetchComments(int id) async {
-  final url = Uri.parse('${baseUrl}/${type2}/binhluan.pc.${language}?id=$id');
-  print('Fetching comments from: $url');
+    final url = Uri.parse('${baseUrl}/${type2}/binhluan.pc.${language}?id=$id');
+    print('Fetching comments from: $url');
 
-  try {
-    final response = await http.get(url);
-    final responseData = json.decode(response.body);
+    try {
+      final response = await http.get(url);
+      final responseData = json.decode(response.body);
 
-    if (responseData is List && responseData.isNotEmpty) {
-      final firstElement = responseData[0] as Map<String, dynamic>;
-      final commentList = firstElement['data'] as List<dynamic>;
-      return commentList.map((e) => Comment.fromJson(e)).toList();
+      if (responseData is List && responseData.isNotEmpty) {
+        final firstElement = responseData[0] as Map<String, dynamic>;
+        final commentList = firstElement['data'] as List<dynamic>;
+        return commentList.map((e) => Comment.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching comments: $e');
+      return [];
     }
-    return [];
-  } catch (e) {
-    print('Error fetching comments: $e');
-    return [];
   }
-}
 
+  static Future<Map<String, dynamic>> sendComments(
+      {required int idPart,
+      required String tenkh,
+      required String sdt,
+      required String noidung,
+      required String sosao,
+      required String token,
+      required String aitrain,
+      required hinhdaidien}) async {}
 }
