@@ -52,6 +52,7 @@ class DetailPageState extends State<DetailPage> {
   bool isLoading = true;
   bool isBackVisible = true;
   final ScrollController _scrollController = ScrollController();
+  int? replyToCommentId;
 
   late String moduleType;
   List<dynamic> _productsRelated = [];
@@ -91,6 +92,20 @@ class DetailPageState extends State<DetailPage> {
         isLoading = false;
       });
     }
+  }
+
+  
+
+  void onReplyPressed(int? commentId) {
+    setState(() {
+      replyToCommentId = commentId;
+    });
+  }
+
+  void clearReply() {
+    setState(() {
+      replyToCommentId = null;
+    });
   }
 
   @override
@@ -287,9 +302,16 @@ class DetailPageState extends State<DetailPage> {
                             ),
                           ),
                           CommentListWidget(
+                            onReply: onReplyPressed,
+                            replyToCommentId: replyToCommentId,
                             postId: int.tryParse(widget.productId) ?? 0,
                           ),
-                          CommentForm(),
+                          if(replyToCommentId ==null)
+                          CommentForm(
+                            onCancelReply: clearReply,
+                            parentCommentId: replyToCommentId,
+                            idPart: widget.productId,
+                          )
                         ],
                       ),
                     ],

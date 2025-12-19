@@ -331,13 +331,85 @@ class APIService {
     }
   }
 
-  static Future<Map<String, dynamic>> sendComments(
-      {required int idPart,
-      required String tenkh,
-      required String sdt,
-      required String noidung,
-      required String sosao,
-      required String token,
-      required String aitrain,
-      required hinhdaidien}) async {}
+///// API COMMMENTS
+  static Future<String> _getAntiBotToken() async {
+    print('➡️ [PRECHECK] Gọi recapcha.precheck');
+
+    final res = await http.post(
+      Uri.parse(
+        'https://vangtran.125.atoz.vn/ww1/recapcha.precheck.ashx',
+      ),
+      body: {
+        'action': 'comment',
+        'hasread': '1',
+      },
+    );
+
+    print('⬅️ [PRECHECK] statusCode = ${res.statusCode}');
+    print('⬅️ [PRECHECK] body = ${res.body}');
+
+    final data = jsonDecode(res.body);
+
+    if (data is! List || data.isEmpty) {
+      throw Exception('Precheck trả về dữ liệu không hợp lệ');
+    }
+
+    if (data[0]['maloi'] != '0') {
+      throw Exception(
+        'Precheck fail: ${data[0]['ThongBao'] ?? 'Unknown error'}',
+      );
+    }
+
+    final token = data[0]['AntiBotToken'];
+    print('✅ [PRECHECK] AntiBotToken = $token');
+
+    return token;
+  }
+
+  static Future<Map<String, dynamic>> sendComments({
+    required String idPart,
+    required String tenkh,
+    required String sdt,
+    required String email,
+    required String noidung,
+    required double sosao,
+    String hinhdaidien = '/dist/images/user.jpg',
+    String aitrain = '',
+  }) async {
+    try {
+      final antiBotToken = await _getAntiBotToken();
+
+      // ⭐ CHỈ LẤY 1–5
+      final int star = sosao.round().clamp(1, 5);
+
+      print('➡️ id (bài viết) = $idPart');
+      print('➡️ id2 (sao) = $star');
+
+      final res = await http.post(
+        Uri.parse(
+          'https://vangtran.125.atoz.vn/ww1/save.binhluan.ashx?id=$idPart',
+        ),
+        body: {
+          'tenkh': tenkh,
+          'txtemail': email,
+          'txtdienthoai': sdt,
+          'noidungtxt': noidung,
+
+          'id2': star.toString(),
+          'id3': hinhdaidien,
+          'AntiBotToken': antiBotToken,
+          'aitrain': aitrain,
+        },
+      );
+
+      final data = jsonDecode(res.body);
+      if (data is List && data.isNotEmpty) {
+        return Map<String, dynamic>.from(data[0]);
+      }
+
+      return {'maloi': '-1', 'ThongBao': 'No response'};
+    } catch (e) {
+      return {'maloi': '-1', 'ThongBao': e.toString()};
+    }
+  }
 }
