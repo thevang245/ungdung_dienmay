@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/product_model.dart';
+import 'package:flutter_application_1/services/address_inf_storage.dart';
+import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/services/cart_local.dart';
+import 'package:flutter_application_1/services/cart_service.dart';
 import 'package:flutter_application_1/view/cart/address_edit.dart';
 import 'package:flutter_application_1/view/cart/bottom_bar.dart';
 import 'package:flutter_application_1/view/cart/cart_item.dart';
@@ -23,6 +27,23 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   String selectedPayment = "cod";
+
+  String name = '';
+  String sdt = '';
+  String email = '';
+  String diachi = '';
+
+  Future<void> _loadAddress() async {
+    final data = await AddressStorage.load();
+
+    setState(() {
+      name = data['name'] ?? '';
+      sdt = data['phone'] ?? '';
+      email = data['email'] ?? '';
+
+      diachi = '${data['street']}, ${data['district']}, ${data['city']}';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -227,27 +248,38 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ),
       bottomNavigationBar: CartBottomBar(
         tongThanhToan: widget.totalAmount + 30000,
-        onOrderPressed: () {
+        onOrderPressed: () async {
           if (selectedPayment == "cod") {
-            // COD
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Đặt hàng thành công!"),
-                duration: Duration(seconds: 2),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else if (selectedPayment == "bank") {
-            // Bank chuyển qua PayOS QR
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PayOSQrScreen(
-                  amount: widget.totalAmount + 30000,
-                  description: "Thanh toán đơn hàng",
+            try {
+              await APICartService.datHang(
+                customerName: name,
+                email: email,
+                tel: sdt,
+                address: diachi,
+              );
+
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Đặt hàng thành công!"),
+                  backgroundColor: Colors.green,
                 ),
-              ),
-            );
+              );
+
+              await LocalCartService.clearCart();
+
+              Navigator.pop(context);
+            } catch (e) {
+              if (!context.mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(e.toString()),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           }
         },
         item: widget.item,

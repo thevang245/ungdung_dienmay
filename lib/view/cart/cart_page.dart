@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/provider/profileProvider.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/services/cart_local.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
 import 'package:flutter_application_1/view/allpage.dart';
 import 'package:flutter_application_1/view/cart/bottom_bar.dart';
@@ -38,7 +39,6 @@ class CartPageState extends State<CartPage> {
 
   bool get hasSelectedItems => cartItems.any((item) => item.isSelect);
 
-
   double get tongThanhToan {
     final totalPrice = calculateTotalPrice(cartItems);
     return totalPrice.toDouble();
@@ -57,16 +57,15 @@ class CartPageState extends State<CartPage> {
   }
 
   Future<void> loadCartItems() async {
-    final profile = Provider.of<ProfileProvider>(context, listen: false);
-
     try {
+      // 🔹 Giữ lại trạng thái checkbox đã chọn
       final selectedIds = cartItems
           .where((item) => item.isSelect)
           .map((e) => e.id.toString())
           .toSet();
 
-      final items =
-          await APICartService.fetchCartItemsById(emailAddress: profile.email);
+      // 🔹 Load giỏ hàng từ SharedPreferences
+      final items = await LocalCartService.getCartItems();
 
       setState(() {
         cartItems = items.map((e) {
@@ -76,21 +75,18 @@ class CartPageState extends State<CartPage> {
 
         isSelectAll =
             cartItems.isNotEmpty && cartItems.every((item) => item.isSelect);
+
         isLoading = false;
       });
+
+      // 🔹 Update badge từ local
+      final total = await LocalCartService.getTotalQuantity();
+      widget.cartitemCount.value = total;
     } catch (e) {
-      print('❌ Lỗi khi load cart items: $e');
+      print('❌ Lỗi khi load cart items (LOCAL): $e');
       setState(() {
         isLoading = false;
       });
-    }
-    final total = await APICartService.getCartItemCountFromApi(profile.email);
-
-    if (widget.cartitemCount.value != total) {
-      widget.cartitemCount.value = total;
-    } else {
-      widget.cartitemCount.value++;
-      widget.cartitemCount.value = total;
     }
   }
 
@@ -232,8 +228,7 @@ class CartPageState extends State<CartPage> {
                               itemCount: cartItems.length + 1,
                               itemBuilder: (context, index) {
                                 if (index == cartItems.length) {
-                                  return Container(
-                                  );
+                                  return Container();
                                 } else {
                                   final item = cartItems[index];
                                   return ItemCart(

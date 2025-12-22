@@ -49,6 +49,103 @@ class APICartService {
     }
   }
 
+  static Future<String> getOrderAntiBotToken() async {
+    final res = await http.post(
+      Uri.parse(
+        'https://vangtran.125.atoz.vn/ww1/recapcha.precheck.ashx',
+      ),
+      body: {
+        'action': 'dathang',
+        'hasread': '1',
+      },
+    );
+
+    if (res.statusCode == 200 && res.body.isNotEmpty) {
+      final data = jsonDecode(res.body);
+      if (data is List && data.isNotEmpty) {
+        return data[0]['AntiBotToken'];
+      }
+    }
+
+    throw Exception('Không lấy được AntiBotToken');
+  }
+
+  static Future<String> getIdbg() async {
+    final res = await http.get(
+      Uri.parse(
+        'https://vangtran.125.atoz.vn/ww1/cookie.mabaogia.ashx',
+      ),
+    );
+
+    print('⬅️ [IDBG] statusCode = ${res.statusCode}');
+    print('⬅️ [IDBG] body = ${res.body}');
+
+    if (res.statusCode == 200 && res.body.isNotEmpty) {
+      final data = jsonDecode(res.body);
+
+      if (data is List) {
+        for (final item in data) {
+          if (item is Map && item['DathangMabaogia'] != null) {
+            return item['DathangMabaogia'].toString();
+          }
+        }
+      }
+    }
+
+    throw Exception('Không lấy được DathangMabaogia');
+  }
+
+  static Future<void> datHang({
+    required String customerName,
+    required String email,
+    required String tel,
+    required String address,
+  }) async {
+    try {
+      print('🟡 [ORDER] Bắt đầu đặt hàng');
+
+      // 1. Lấy idbg chuẩn
+      final idbg = await getIdbg();
+      print('🟡 [ORDER] idbg = $idbg');
+
+      // 2. Lấy token
+      final antiBotToken = await getOrderAntiBotToken();
+      print('🟡 [ORDER] AntiBotToken = $antiBotToken');
+
+      // 3. Gửi đơn
+      final res = await http.post(
+        Uri.parse(
+          'https://vangtran.125.atoz.vn/ww1/save.dathang.ashx?idbg=$idbg',
+        ),
+        body: {
+          'CustomerName': customerName,
+          'Address': address,
+          'EmailAddress': email,
+          'Tel': tel,
+          'AntiBotToken': antiBotToken,
+          'action': 'dathang',
+        },
+      );
+
+      print('⬅️ [ORDER] statusCode = ${res.statusCode}');
+      print('⬅️ [ORDER] body = ${res.body}');
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (data is List && data.isNotEmpty && data[0]['maloi'] == '1') {
+          print('✅ Đặt hàng thành công');
+          return;
+        }
+      }
+
+      throw Exception('Đặt hàng không thành công');
+    } catch (e) {
+      print('🔥 [ORDER] Lỗi: $e');
+      rethrow;
+    }
+  }
+
+//////api giỏ hàng server
   static Future<bool> updateCartItemQuantity({
     required String emailAddress,
     required int productId,
@@ -182,48 +279,6 @@ class APICartService {
     }
   }
 
-  static Future<void> datHang({
-    required String moduletype,
-    required String customerName,
-    required String email,
-    required String tel,
-    required String address,
-    required double totalPrice,
-    required List<CartItemModel> items,
-  }) async {
-    final url = Uri.parse(
-        '${APIService.baseUrl}/${APIService.type1}/order.${APIService.language}');
-    final body = {
-      'customer_name': customerName,
-      'email': email,
-      'tel': tel,
-      'address': address,
-      'total_price': totalPrice.toString(),
-      'items': items
-          .map((item) => {
-                'idpart': int.tryParse(item.id.toString()) ?? 0,
-                'quantity': item.quantity,
-                'price': item.price,
-                'moduletype': item.moduleType
-              })
-          .toList(),
-    };
-    final response = await http.post(
-      url,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(body),
-    );
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      print('Đặt hàng thành công!');
-    } else {
-      print('Đặt hàng lỗi!');
-      throw Exception('Đặt hàng thất bại');
-    }
-  }
-
   static Future<String?> cancelOrder({
     required String orderId,
     required String emailAddress,
@@ -247,7 +302,7 @@ class APICartService {
         final responseData = json.decode(response.body);
         if (responseData['status'] == 'success') {
           print('Hủy đơn thành công');
-          return null; // null nghĩa là không có lỗi
+          return null;
         } else {
           print('API trả về lỗi: ${responseData['message']}');
           return responseData['message'] ?? 'Hủy đơn hàng thất bại';

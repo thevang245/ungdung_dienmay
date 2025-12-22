@@ -44,9 +44,7 @@ Future<void> handleDatHang(
         email: email,
         tel: tel,
         address: address,
-        totalPrice: totalPrice,
-        items: selectedItems,
-        moduletype: moduletype);
+       );
 
     // Xoá từng item khỏi giỏ
     for (var item in selectedItems) {

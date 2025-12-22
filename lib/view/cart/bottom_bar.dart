@@ -10,14 +10,14 @@ class CartBottomBar extends StatelessWidget {
   final List<CartItemModel> item;
   final bool order;
 
-  const CartBottomBar(
-      {super.key,
-      required this.tongThanhToan,
-      required this.onOrderPressed,
-      this.isOrderEnabled = false,
-      required this.item,
-      this.order = false,
-      });
+  const CartBottomBar({
+    super.key,
+    required this.tongThanhToan,
+    required this.onOrderPressed,
+    this.isOrderEnabled = false,
+    required this.item,
+    this.order = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class CartBottomBar extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                     bottom: BorderSide(
-                        color: (isOrderEnabled || order) 
+                        color: (isOrderEnabled || order)
                             ? appColor
                             : const Color(0xff99bbff),
                         width: 12)),
@@ -62,31 +62,32 @@ class CartBottomBar extends StatelessWidget {
             flex: 2,
             child: Container(
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30)),
-                  
-                  ),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(30)),
+              ),
               child: ElevatedButton(
                 onPressed: () {
-                  if (isOrderEnabled || order)  {
+                  if (isOrderEnabled || order) {
                     onOrderPressed();
                   } else {
-                    showToast(
-                        'Vui lòng chọn ít nhất 1 sản phẩm',backgroundColor: Colors.red);
+                    showToast('Vui lòng chọn ít nhất 1 sản phẩm',
+                        backgroundColor: Colors.red);
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: (isOrderEnabled || order) 
+                  backgroundColor: (isOrderEnabled || order)
                       ? appColor
                       : const Color(0xff99bbff), // xanh nhạt khi disable
                   foregroundColor: Colors.white,
                   shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(50))),
+                      borderRadius:
+                          BorderRadius.only(topLeft: Radius.circular(50))),
                   elevation: 0,
                 ),
                 child: Center(
                   child: Text(
-                    order? 'Đặt hàng' : 'Mua hàng',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    order ? 'Đặt hàng' : 'Mua hàng',
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

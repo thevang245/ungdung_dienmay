@@ -6,7 +6,7 @@ class CartItemModel {
   final String moduleType;
   int quantity;
   bool isSelect;
-  final int categoryId; // Thêm thuộc tính này
+  final int categoryId;
   
 
   CartItemModel({
@@ -17,7 +17,7 @@ class CartItemModel {
     required this.moduleType,
     required this.quantity,
     this.isSelect = false,
-    required this.categoryId, // Thêm tham số
+    required this.categoryId,
     
   });
 
@@ -30,7 +30,7 @@ class CartItemModel {
       'moduleType': moduleType,
       'quantity': quantity,
       'isSelect': isSelect,
-      'categoryId': categoryId, // Thêm vào JSON
+      'categoryId': categoryId,
     };
   }
 

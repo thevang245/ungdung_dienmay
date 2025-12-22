@@ -87,7 +87,7 @@ class _ItemCartState extends State<ItemCart> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    widget.item.image,
+                    '${widget.item.image}',
                     width: 80,
                     height: 80,
                     fit: BoxFit.contain,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/services/address_inf_storage.dart';
 import 'package:flutter_application_1/widgets/widget_auth.dart';
 
 class EditAddressScreen extends StatefulWidget {
@@ -13,8 +14,25 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   final _phoneController = TextEditingController();
   final _cityController = TextEditingController();
   final _districtController = TextEditingController();
-  final _wardController = TextEditingController();
+  final _emailController = TextEditingController();
   final _streetController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _loadAddress();
+  }
+
+  Future<void> _loadAddress() async {
+    final data = await AddressStorage.load();
+    setState(() {
+      _nameController.text = data['name']!;
+      _phoneController.text = data['phone']!;
+      _emailController.text = data['email']!;
+      _cityController.text = data['city']!;
+      _districtController.text = data['district']!;
+      _streetController.text = data['street']!;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +67,16 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                     value!.isEmpty ? "Nhập số điện thoại" : null,
               ),
               TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: "Email"),
+              ),
+              TextFormField(
                 controller: _cityController,
                 decoration: const InputDecoration(labelText: "Tỉnh/Thành phố"),
               ),
               TextFormField(
                 controller: _districtController,
                 decoration: const InputDecoration(labelText: "Quận/Huyện"),
-              ),
-              TextFormField(
-                controller: _wardController,
-                decoration: const InputDecoration(labelText: "Phường/Xã"),
               ),
               TextFormField(
                 controller: _streetController,
@@ -69,10 +87,25 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      // 🔹 Lưu SharedPreferences
+                      await AddressStorage.save(
+                        name: _nameController.text,
+                        phone: _phoneController.text,
+                        email: _emailController.text,
+                        city: _cityController.text,
+                        district: _districtController.text,
+                        street: _streetController.text,
+                      );
+
                       final fullAddress =
-                          "${_nameController.text} - ${_phoneController.text}\n${_streetController.text}, ${_wardController.text}, ${_districtController.text}, ${_cityController.text}";
+                          "${_nameController.text} - ${_phoneController.text}\n"
+                          "${_streetController.text}, "
+                          "${_districtController.text}, "
+                          "${_cityController.text}\n"
+                          "${_emailController.text}";
+
                       Navigator.pop(context, fullAddress);
                     }
                   },

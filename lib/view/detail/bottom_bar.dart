@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/services/cart_local.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/until.dart';
@@ -53,17 +55,35 @@ class BottomActionBar extends StatelessWidget {
                 ),
                 child: ElevatedButton(
                   onPressed: () async {
-                    print('emailaddress: ${Global.email}');
-                    final result = await APICartService.addToCart(
+                    
+                    await LocalCartService.addToCart(
+                      CartItemModel(
+                        id: productId.toString(),
+                        name: tieude,
+                        image: '${APIService.baseUrl}/$hinhdaidien',
+                        price: double.tryParse(gia.toString()) ?? 0,
                         moduleType: moduleType,
-                        productId: productId,
-                        cartitemCount: cartitemCount,
-                        quantity: 1);
+                        quantity: 1,
+                        categoryId: 0,
+                      ),
+                    );
+
+                    
+                    cartitemCount.value =
+                        await LocalCartService.getTotalQuantity();
+
+                    
+                    final result = await APICartService.addToCart(
+                      moduleType: moduleType,
+                      productId: productId,
+                      cartitemCount: cartitemCount,
+                      quantity: 1,
+                    );
 
                     if (result == null) {
                       showToast('Thêm vào giỏ hàng thành công!');
                     } else {
-                      showToast(result as String, backgroundColor: Colors.red);
+                      showToast(result, backgroundColor: Colors.red);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -72,12 +92,9 @@ class BottomActionBar extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: const RoundedRectangleBorder(
-                      
                       borderRadius: BorderRadius.only(
-                        bottomRight:
-                            Radius.circular(30), 
-                            bottomLeft: Radius.circular(30)
-                      ),
+                          bottomRight: Radius.circular(30),
+                          bottomLeft: Radius.circular(30)),
                     ),
                     elevation: 0,
                   ),
@@ -114,7 +131,6 @@ class BottomActionBar extends StatelessWidget {
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(50),
-                     
                     ),
                   ),
                   elevation: 0,
