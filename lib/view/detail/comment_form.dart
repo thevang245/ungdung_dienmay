@@ -153,6 +153,7 @@ class _CommentFormState extends State<CommentForm> {
                         email: _emailController.text,
                         noidung: _commentController.text,
                         sosao: _rating,
+                        l: widget.parentCommentId
                       );
 
                       final thongBao =

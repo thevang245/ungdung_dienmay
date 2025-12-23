@@ -151,6 +151,7 @@ class _PageAllState extends State<PageAll> {
         return _cartPage ??= CartPage(
           key: cartPageKey,
           cartitemCount: cartItemCountNotifier,
+          selectedProductIds: [],
         );
       case 3:
         return _profilePage ??= ProfilePage(

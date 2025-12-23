@@ -23,25 +23,32 @@ class favouritePageState extends State<favouritePage>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Lấy email từ Provider
+    
     final profile = Provider.of<ProfileProvider>(context, listen: false);
-    reloadFavourites(profile.email);
+    reloadFavourites();
   }
 
-  Future<void> reloadFavourites(String email) async {
+  Future<void> reloadFavourites() async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'favourite_items_$email';
+    const key = 'favourite_items';
+
     final items = prefs.getStringList(key) ?? [];
 
     final List<Map<String, dynamic>> loadedItems = [];
 
     for (var itemStr in items) {
       try {
-        final itemMap = json.decode(itemStr);
+        final Map<String, dynamic> itemMap =
+            Map<String, dynamic>.from(json.decode(itemStr));
+
+        itemMap['id'] = itemMap['id'].toString();
+        itemMap['gia'] = itemMap['gia']?.toString() ?? '0';
+
         loadedItems.add(itemMap);
-      } catch (_) {}
+      } catch (e) {
+        print('Lỗi parse favourite item: $e');
+      }
     }
-    print("productfavourite: $loadedItems");
 
     setState(() {
       favouriteItems = loadedItems;
@@ -71,7 +78,7 @@ class favouritePageState extends State<favouritePage>
       backgroundColor: Colors.grey[100],
       body: RefreshIndicator(
         color: Color(0xff0066FF),
-        onRefresh: () => reloadFavourites(profile.email),
+        onRefresh: () => reloadFavourites(),
         child: favouriteItems.isEmpty
             ? Center(
                 child: Column(
@@ -87,9 +94,15 @@ class favouritePageState extends State<favouritePage>
                   final item = favouriteItems[index];
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPage(
-                        modelType: item['moduleType'],
-                        productId: item['id'].toString(), categoryNotifier: ValueNotifier<int>(1), cartitemCount: ValueNotifier<int>(1)),));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailPage(
+                                modelType: item['moduleType'],
+                                productId: item['id'].toString(),
+                                categoryNotifier: ValueNotifier<int>(1),
+                                cartitemCount: ValueNotifier<int>(1)),
+                          ));
                     },
                     child: Card(
                       elevation: 0,

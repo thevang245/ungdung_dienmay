@@ -121,8 +121,15 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                                 Row(
                                   children: [
                                     TextButton(
-                                      onPressed: () {
-                                        // TODO: xử lý thích
+                                      onPressed: () async {
+                                        await APIService.likeComment(
+                                          postId: widget.postId,
+                                          commentId: c.id,
+                                        );
+
+                                        setState(() {
+                                          c.likeCount++; 
+                                        });
                                       },
                                       style: TextButton.styleFrom(
                                         padding: EdgeInsets.zero,
@@ -131,13 +138,18 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                                             MaterialTapTargetSize.shrinkWrap,
                                       ),
                                       child: Row(
-                                        children: const [
-                                          Icon(Icons.thumb_up_alt_outlined,
-                                              size: 16, color: Colors.black54),
-                                          SizedBox(width: 4),
+                                        children: [
+                                          const Icon(
+                                            Icons.thumb_up_alt_outlined,
+                                            size: 16,
+                                            color: Colors.black54,
+                                          ),
+                                          const SizedBox(width: 4),
                                           Text(
-                                            'Thích',
-                                            style: TextStyle(
+                                            c.likeCount > 0
+                                                ? 'Thích (${c.likeCount})'
+                                                : 'Thích',
+                                            style: const TextStyle(
                                                 color: Colors.black54),
                                           ),
                                         ],
@@ -160,13 +172,12 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                                       ),
                                     ),
                                   ],
-                                ),
+                                )
                               ],
                             ),
                           ),
                         ],
                       ),
-
                       if (widget.replyToCommentId == c.id)
                         Padding(
                           padding: const EdgeInsets.only(left: 50, top: 8),
@@ -179,8 +190,6 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                             },
                           ),
                         ),
-
-                    
                       if (c.replies.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(left: 50, top: 8),
@@ -190,6 +199,7 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                                 padding: const EdgeInsets.only(bottom: 6),
                                 child: ReplyCommentItem(
                                   comment: reply,
+                                  postID: widget.postId,
                                 ),
                               );
                             }).toList(),

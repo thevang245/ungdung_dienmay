@@ -9,16 +9,15 @@ import 'package:http/http.dart' as http;
 
 class APIFavouriteService {
   static Future<bool> toggleFavourite({
-    required BuildContext context,
-    required String userId,
     required int productId,
     required String tieude,
     required String gia,
     required String hinhdaidien,
-    required String moduleType, 
+    required String moduleType,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'favourite_items_$userId';
+    const key = 'favourite_items';
+
     List<String> favouriteItems = prefs.getStringList(key) ?? [];
 
     final itemMap = {
@@ -32,28 +31,30 @@ class APIFavouriteService {
     bool exists = false;
     String? existingItem;
 
-    for (var itemStr in favouriteItems) {
+    for (final itemStr in favouriteItems) {
       try {
         final item = json.decode(itemStr);
-        if (item['id'] == productId.toString()) {
+        final itemId = item['id'].toString(); 
+
+        if (itemId == productId.toString()) {
           exists = true;
           existingItem = itemStr;
           break;
         }
-      } catch (_) {}
+      } catch (e) {
+        print('JSON error: $e');
+      }
     }
 
     if (exists && existingItem != null) {
       favouriteItems.remove(existingItem);
       await prefs.setStringList(key, favouriteItems);
       showToast('Đã xóa khỏi yêu thích');
-      print('Đã xóa khỏi yêu thích: $productId');
       return false;
     } else {
       favouriteItems.add(json.encode(itemMap));
       await prefs.setStringList(key, favouriteItems);
       showToast('Đã thêm vào yêu thích');
-      print('Đã thêm vào yêu thích: $productId');
       return true;
     }
   }

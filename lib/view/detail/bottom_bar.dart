@@ -3,6 +3,8 @@ import 'package:flutter_application_1/models/product_model.dart';
 import 'package:flutter_application_1/services/api_service.dart';
 import 'package:flutter_application_1/services/cart_local.dart';
 import 'package:flutter_application_1/services/cart_service.dart';
+import 'package:flutter_application_1/view/cart/cart_page.dart';
+import 'package:flutter_application_1/view/cart/confirm_order.dart';
 import 'package:flutter_application_1/view/home/homepage.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 
@@ -55,7 +57,6 @@ class BottomActionBar extends StatelessWidget {
                 ),
                 child: ElevatedButton(
                   onPressed: () async {
-                    
                     await LocalCartService.addToCart(
                       CartItemModel(
                         id: productId.toString(),
@@ -68,11 +69,9 @@ class BottomActionBar extends StatelessWidget {
                       ),
                     );
 
-                    
                     cartitemCount.value =
                         await LocalCartService.getTotalQuantity();
 
-                    
                     final result = await APICartService.addToCart(
                       moduleType: moduleType,
                       productId: productId,
@@ -116,12 +115,27 @@ class BottomActionBar extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: () async {
-                  await APICartService.addToCart(
-                      moduleType: moduleType,
-                      productId: productId as int,
-                      cartitemCount: cartitemCount,
-                      quantity: 1);
-                  // gotoCart(productId);
+                  final buyNowItem = CartItemModel(
+                    id: productId.toString(),
+                    name: tieude,
+                    image: '${APIService.baseUrl}/$hinhdaidien',
+                    price: double.tryParse(gia.toString()) ?? 0,
+                    moduleType: moduleType,
+                    quantity: 1,
+                    categoryId: 0,
+                  );
+
+                  final totalAmount = buyNowItem.price * buyNowItem.quantity;
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CheckoutPage(
+                        item: [buyNowItem],
+                        totalAmount: totalAmount,
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: appColor,

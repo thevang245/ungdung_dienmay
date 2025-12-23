@@ -4,28 +4,41 @@ class Comment {
   final String avatar;
   final String content;
   final DateTime time;
-  final int rating;
+
+  final int rating;        // số sao (comment cha)
+  int likeCount;           // 👈 số lượt thích (có thể tăng giảm)
   final List<Comment> replies;
 
-  Comment(
-      {required this.id,
-      required this.name,
-      required this.avatar,
-      required this.content,
-      required this.time,
-      required this.rating,
-      required this.replies});
+  Comment({
+    required this.id,
+    required this.name,
+    required this.avatar,
+    required this.content,
+    required this.time,
+    required this.rating,
+    required this.likeCount,
+    required this.replies,
+  });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-        id: json['id'],
-        name: json['nguoidang'],
-        avatar: json['hinhdaidien'],
-        content: json['noidungbinhluan'] ?? json['noidung'] ?? '',
-        time: DateTime.parse(json['ngaydang']),
-        rating: (json['rating'] / 50).round(),
-        replies: json['replies'] != null
-            ? (json['replies'] as List).map((e) => Comment.fromJson(e)).toList()
-            : []);
+      id: json['id'] ?? 0,
+      name: json['nguoidang'] ?? '',
+      avatar: json['hinhdaidien'] ?? '',
+      content: json['noidungbinhluan'] ?? json['noidung'] ?? '',
+      time: DateTime.tryParse(json['ngaydang'] ?? '') ?? DateTime.now(),
+
+      // ⭐ rating chỉ có ở comment cha
+      rating: ((json['rating'] ?? 0) / 50).round(),
+
+      // ❤️ số lượt thích
+      likeCount: json['soluongthich'] ?? 0,
+
+      replies: json['replies'] != null
+          ? (json['replies'] as List)
+              .map((e) => Comment.fromJson(e))
+              .toList()
+          : [],
+    );
   }
 }

@@ -94,8 +94,6 @@ class DetailPageState extends State<DetailPage> {
     }
   }
 
-  
-
   void onReplyPressed(int? commentId) {
     setState(() {
       replyToCommentId = commentId;
@@ -306,12 +304,12 @@ class DetailPageState extends State<DetailPage> {
                             replyToCommentId: replyToCommentId,
                             postId: int.tryParse(widget.productId) ?? 0,
                           ),
-                          if(replyToCommentId ==null)
-                          CommentForm(
-                            onCancelReply: clearReply,
-                            parentCommentId: replyToCommentId,
-                            idPart: widget.productId,
-                          )
+                          if (replyToCommentId == null)
+                            CommentForm(
+                              onCancelReply: clearReply,
+                              parentCommentId: replyToCommentId,
+                              idPart: widget.productId,
+                            )
                         ],
                       ),
                     ],
@@ -347,29 +345,31 @@ class DetailPageState extends State<DetailPage> {
                       ),
                     ),
                     const Spacer(),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.favorite_border,
-                            color: Colors.white),
-                        onPressed: () async {
-                          await APIFavouriteService.toggleFavourite(
-                            moduleType: moduleType,
-                            context: context,
-                            userId: Global.email,
-                            productId: int.tryParse(widget.productId) ?? 0,
-                            tieude: product['tieude'],
-                            gia: product['gia'] ?? '',
-                            hinhdaidien: '${product['hinhdaidien']}',
-                          );
-                        },
-                      ),
-                    ),
+                    model.toLowerCase() == 'tintuc'
+                        ? Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                              color: Colors.black.withOpacity(0.5),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.favorite_border,
+                                  color: Colors.white),
+                              onPressed: () async {
+                                await APIFavouriteService.toggleFavourite(
+                                  moduleType: moduleType,
+                                  productId:
+                                      int.tryParse(widget.productId) ?? 0,
+                                  tieude: product['tieude'],
+                                  gia: product['gia'] ?? '',
+                                  hinhdaidien: '${product['hinhdaidien']}',
+                                );
+                              },
+                            ),
+                          )
+                        : SizedBox(),
                     SizedBox(width: 5),
                     Container(
                       width: 40,

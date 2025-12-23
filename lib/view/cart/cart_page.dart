@@ -19,7 +19,12 @@ import 'package:provider/provider.dart';
 
 class CartPage extends StatefulWidget {
   final ValueNotifier<int> cartitemCount;
-  const CartPage({super.key, required this.cartitemCount});
+  final List<int>? selectedProductIds; // 👈 thêm dòng này
+
+  const CartPage(
+      {super.key,
+      required this.cartitemCount,
+      required this.selectedProductIds});
 
   @override
   State<CartPage> createState() => CartPageState();
@@ -47,24 +52,28 @@ class CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
-    init();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.selectedProductIds != null &&
+          widget.selectedProductIds!.isNotEmpty) {
+        await chonNhieuVaMoBottomSheet(widget.selectedProductIds!);
+      } else {
+        await loadCartItems();
+      }
+    });
   }
 
   Future<void> init() async {
     await loadCartItems();
-    emailController.text = Global.email;
-    fullnameController.text = Global.name;
   }
 
   Future<void> loadCartItems() async {
     try {
-      // 🔹 Giữ lại trạng thái checkbox đã chọn
       final selectedIds = cartItems
           .where((item) => item.isSelect)
           .map((e) => e.id.toString())
           .toSet();
 
-      // 🔹 Load giỏ hàng từ SharedPreferences
       final items = await LocalCartService.getCartItems();
 
       setState(() {
@@ -79,7 +88,6 @@ class CartPageState extends State<CartPage> {
         isLoading = false;
       });
 
-      // 🔹 Update badge từ local
       final total = await LocalCartService.getTotalQuantity();
       widget.cartitemCount.value = total;
     } catch (e) {
@@ -101,81 +109,6 @@ class CartPageState extends State<CartPage> {
           item.isSelect = itemId != null && productIdsVuaThem.contains(itemId);
         }
         isSelectAll = cartItems.every((item) => item.isSelect);
-      });
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && hasSelectedItems) {
-          showModalBottomSheet(
-            context: context,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            builder: (BuildContext context) {
-              return OrderConfirmationSheet(
-                parentContext: context,
-                addressController: addressController,
-                fullnameController: fullnameController,
-                phoneController: phoneController,
-                emailController: emailController,
-                tongThanhToan: tongThanhToan,
-                onConfirm: () async {
-                  await showDialog(
-                    context: rootContext,
-                    barrierDismissible: false,
-                    builder: (dialogContext) {
-                      // Gọi xử lý đơn hàng sau khi dialog đã render
-                      Future.delayed(Duration.zero, () async {
-                        await handleDatHang(
-                          moduletype: cartItems
-                              .firstWhere((item) => item.isSelect)
-                              .moduleType,
-                          totalPrice: tongThanhToan,
-                          address: addressController.text,
-                          cartitemCount: widget.cartitemCount,
-                          context: context,
-                          userId: Global.email,
-                          customerName: fullnameController.text,
-                          email: emailController.text,
-                          tel: phoneController.text,
-                          cartItems: cartItems,
-                          onCartReload: loadCartItems,
-                        );
-
-                        if (mounted) {
-                          Navigator.of(dialogContext, rootNavigator: true)
-                              .pop();
-                        }
-                      });
-
-                      return const Dialog(
-                        backgroundColor: Colors.black87,
-                        insetPadding: EdgeInsets.all(80),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(
-                                  color: Color(0xff0066FF)),
-                              SizedBox(height: 16),
-                              Text(
-                                "Đang xử lý đơn hàng...",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          );
-        }
       });
     }
   }

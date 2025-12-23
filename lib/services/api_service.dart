@@ -345,8 +345,8 @@ class APIService {
       },
     );
 
-    print('⬅️ [PRECHECK] statusCode = ${res.statusCode}');
-    print('⬅️ [PRECHECK] body = ${res.body}');
+    print('statusCode = ${res.statusCode}');
+    print('body = ${res.body}');
 
     final data = jsonDecode(res.body);
 
@@ -361,7 +361,7 @@ class APIService {
     }
 
     final token = data[0]['AntiBotToken'];
-    print('✅ [PRECHECK] AntiBotToken = $token');
+    print('AntiBotToken = $token');
 
     return token;
   }
@@ -372,34 +372,38 @@ class APIService {
     required String sdt,
     required String email,
     required String noidung,
-    required double sosao,
+    double sosao = 0,
+    int? l,
     String hinhdaidien = '/dist/images/user.jpg',
     String aitrain = '',
   }) async {
     try {
       final antiBotToken = await _getAntiBotToken();
+      print('idcommentparent: $l');
 
-      // ⭐ CHỈ LẤY 1–5
-      final int star = sosao.round().clamp(1, 5);
+      final Map<String, String> body = {
+        'tenkh': tenkh,
+        'txtemail': email,
+        'txtdienthoai': sdt,
+        'noidungtxt': noidung,
+        'id3': hinhdaidien,
+        'AntiBotToken': antiBotToken,
+        'aitrain': aitrain,
+      };
 
-      print('➡️ id (bài viết) = $idPart');
-      print('➡️ id2 (sao) = $star');
+      if (l != null && l > 0) {
+        body['l'] = l.toString();
+        body['id2'] = '0';
+      } else if (sosao > 0) {
+        final int star = sosao.round().clamp(1, 5);
+        body['id2'] = star.toString();
+      }
 
       final res = await http.post(
         Uri.parse(
           'https://vangtran.125.atoz.vn/ww1/save.binhluan.ashx?id=$idPart',
         ),
-        body: {
-          'tenkh': tenkh,
-          'txtemail': email,
-          'txtdienthoai': sdt,
-          'noidungtxt': noidung,
-
-          'id2': star.toString(),
-          'id3': hinhdaidien,
-          'AntiBotToken': antiBotToken,
-          'aitrain': aitrain,
-        },
+        body: body,
       );
 
       final data = jsonDecode(res.body);
@@ -410,6 +414,49 @@ class APIService {
       return {'maloi': '-1', 'ThongBao': 'No response'};
     } catch (e) {
       return {'maloi': '-1', 'ThongBao': e.toString()};
+    }
+  }
+
+  static Future<void> likeComment({
+    required int postId,
+    required int? commentId,
+  }) async {
+    try {
+      final antiBotToken = await _getAntiBotToken();
+
+      print('AntiBotToken = $antiBotToken');
+      print('postid = $postId');
+      print('commentID = $commentId');
+
+      final res = await http.post(
+        Uri.parse(
+          'https://vangtran.125.atoz.vn/ww1/save.binhluan.thich.ashx'
+          '?id=$postId&id2=$commentId',
+        ),
+        body: {
+          'AntiBotToken': antiBotToken,
+        },
+      );
+
+      print('statusCode = ${res.statusCode}');
+      print('body = ${res.body}');
+
+      if (res.statusCode == 200 && res.body.isNotEmpty) {
+        final data = jsonDecode(res.body);
+
+       
+        if (data is Map && data['maloi']?.toString() == '1') {
+          print('Like comment thành công');
+          return;
+        }
+
+        throw Exception(data['ThongBao'] ?? 'Like thất bại');
+      }
+
+      throw Exception('HTTP error ${res.statusCode}');
+    } catch (e) {
+      print('[LIKE] Lỗi: $e');
+      rethrow;
     }
   }
 }

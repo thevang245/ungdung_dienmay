@@ -46,6 +46,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadAddress();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -88,24 +94,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           RichText(
-                            text: const TextSpan(
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  height: 1.4,
-                                  color: Colors.black),
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontSize: 14,
+                                height: 1.4,
+                                color: Colors.black,
+                              ),
                               children: [
-                                TextSpan(text: "Nguyễn Văn A  •  "),
                                 TextSpan(
-                                  text: "0987456321",
-                                  style: TextStyle(color: Colors.black38),
+                                  text: name.isNotEmpty ? name : 'Chưa có tên',
+                                ),
+                                const TextSpan(text: '  •  '),
+                                TextSpan(
+                                  text: sdt.isNotEmpty ? sdt : 'Chưa có SĐT',
+                                  style: const TextStyle(color: Colors.black38),
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            "123 Đường ABC, Quận 1, TP.HCM",
-                            style: TextStyle(fontSize: 14),
+                          Text(
+                            diachi.isNotEmpty ? diachi : 'Chưa có địa chỉ',
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ],
                       ),

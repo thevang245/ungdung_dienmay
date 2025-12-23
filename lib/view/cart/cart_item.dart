@@ -99,7 +99,6 @@ class _ItemCartState extends State<ItemCart> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // TIÊU ĐỀ
                     Text(
                       widget.item.name ?? 'Không có tên',
                       style: const TextStyle(
