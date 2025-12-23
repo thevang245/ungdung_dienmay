@@ -337,7 +337,7 @@ class APIService {
 
     final res = await http.post(
       Uri.parse(
-        'https://vangtran.125.atoz.vn/ww1/recapcha.precheck.ashx',
+        '${baseUrl}/ww1/recapcha.precheck.ashx',
       ),
       body: {
         'action': 'comment',
@@ -401,7 +401,7 @@ class APIService {
 
       final res = await http.post(
         Uri.parse(
-          'https://vangtran.125.atoz.vn/ww1/save.binhluan.ashx?id=$idPart',
+          '${baseUrl}/ww1/save.binhluan.ashx?id=$idPart',
         ),
         body: body,
       );
@@ -430,7 +430,7 @@ class APIService {
 
       final res = await http.post(
         Uri.parse(
-          'https://vangtran.125.atoz.vn/ww1/save.binhluan.thich.ashx'
+          '${baseUrl}/ww1/save.binhluan.thich.ashx'
           '?id=$postId&id2=$commentId',
         ),
         body: {

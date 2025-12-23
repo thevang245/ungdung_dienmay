@@ -52,7 +52,7 @@ class APICartService {
   static Future<String> getOrderAntiBotToken() async {
     final res = await http.post(
       Uri.parse(
-        'https://vangtran.125.atoz.vn/ww1/recapcha.precheck.ashx',
+        '${APIService.baseUrl}/ww1/recapcha.precheck.ashx',
       ),
       body: {
         'action': 'dathang',
@@ -73,7 +73,7 @@ class APICartService {
   static Future<String> getIdbg() async {
     final res = await http.get(
       Uri.parse(
-        'https://vangtran.125.atoz.vn/ww1/cookie.mabaogia.ashx',
+        '${APIService.baseUrl}/ww1/cookie.mabaogia.ashx',
       ),
     );
 
@@ -115,7 +115,7 @@ class APICartService {
       // 3. Gửi đơn
       final res = await http.post(
         Uri.parse(
-          'https://vangtran.125.atoz.vn/ww1/save.dathang.ashx?idbg=$idbg',
+          '${APIService.baseUrl}/ww1/save.dathang.ashx?idbg=$idbg',
         ),
         body: {
           'CustomerName': customerName,
