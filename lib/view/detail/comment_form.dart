@@ -9,6 +9,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 class CommentForm extends StatefulWidget {
   final int? parentCommentId;
   final VoidCallback? onCancelReply;
+  final VoidCallback? onCommentSuccess;
   final bool isInline;
   final String idPart;
   const CommentForm(
@@ -16,6 +17,7 @@ class CommentForm extends StatefulWidget {
       required this.idPart,
       this.isInline = false,
       this.onCancelReply,
+      this.onCommentSuccess,
       this.parentCommentId});
 
   @override
@@ -28,6 +30,26 @@ class _CommentFormState extends State<CommentForm> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  bool _isSubmitting = false;
+
+  void _handleResult(Map<String, dynamic> result) {
+    final thongBao = result['ThongBao'] ?? 'Có lỗi';
+    final maLoi = result['maloi'];
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(thongBao),
+        backgroundColor: maLoi == '1' ? Colors.green : Colors.red,
+      ),
+    );
+
+    if (maLoi == '1') {
+      FocusManager.instance.primaryFocus?.unfocus();
+      _commentController.clear();
+      setState(() => _rating = 0);
+      widget.onCommentSuccess?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +130,6 @@ class _CommentFormState extends State<CommentForm> {
                           onPressed: () {
                             widget.onCancelReply?.call();
                           },
-                          
                           label: const Text('Hủy',
                               style: TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
@@ -145,36 +166,64 @@ class _CommentFormState extends State<CommentForm> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final result = await APIService.sendComments(
-                        idPart: widget.idPart,
-                        tenkh: _nameController.text,
-                        sdt: _phoneController.text,
-                        email: _emailController.text,
-                        noidung: _commentController.text,
-                        sosao: _rating,
-                        l: widget.parentCommentId
-                      );
+                    onPressed: _isSubmitting
+                        ? null
+                        : () async {
+                            if (!mounted) return;
 
-                      final thongBao =
-                          result['ThongBao']?.toString() ?? 'Có lỗi xảy ra';
-                      final maLoi = result['maloi']?.toString();
+                            setState(() => _isSubmitting = true);
 
-                      if (!mounted) return;
+                            try {
+                              final result = await APIService.sendComments(
+                                idPart: widget.idPart,
+                                tenkh: _nameController.text,
+                                sdt: _phoneController.text,
+                                email: _emailController.text,
+                                noidung: _commentController.text,
+                                sosao: _rating,
+                                l: widget.parentCommentId,
+                              );
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(thongBao),
-                          backgroundColor:
-                              maLoi == '1' ? Colors.green : Colors.red,
-                        ),
-                      );
+                              if (!mounted) return;
 
-                      if (maLoi == '1') {
-                        _commentController.clear();
-                        setState(() => _rating = 0);
-                      }
-                    },
+                              final requireCaptcha =
+                                  result['RequireCaptcha'] == 1 ||
+                                      result['RequireCaptcha'] == '1' ||
+                                      result['RequireCaptcha'] == true;
+
+                              if (requireCaptcha) {
+                                final token = await showCaptchaDialog(
+                                  context: context,
+                                  message: result['ThongBao'],
+                                  captchaCode: result['CaptchaCode'],
+                                );
+
+                                if (token == null) return;
+
+                                final retry = await APIService.sendComments(
+                                  idPart: widget.idPart,
+                                  tenkh: _nameController.text,
+                                  sdt: _phoneController.text,
+                                  email: _emailController.text,
+                                  noidung: _commentController.text,
+                                  sosao: _rating,
+                                  l: widget.parentCommentId,
+                                  antiBotToken: token,
+                                );
+
+                                if (!mounted) return;
+
+                                _handleResult(retry);
+                                return;
+                              }
+
+                              _handleResult(result);
+                            } finally {
+                              if (mounted) {
+                                setState(() => _isSubmitting = false);
+                              }
+                            }
+                          },
                     label: const Text('Gửi',
                         style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(

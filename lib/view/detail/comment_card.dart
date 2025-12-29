@@ -17,26 +17,22 @@ class CommentListWidget extends StatefulWidget {
       required this.replyToCommentId});
 
   @override
-  State<CommentListWidget> createState() => _CommentListWidgetState();
+  State<CommentListWidget> createState() => CommentListWidgetState();
 }
 
-class _CommentListWidgetState extends State<CommentListWidget> {
+class CommentListWidgetState extends State<CommentListWidget> {
   late Future<List<Comment>> futureComments;
 
   @override
   void initState() {
     super.initState();
-    futureComments = loadComments();
+    loadComments();
   }
 
-  Future<List<Comment>> loadComments() async {
-    try {
-      final comments = await APIService.fetchComments(widget.postId);
-      return comments;
-    } catch (e) {
-      print('Error loading comments: $e');
-      return [];
-    }
+  void loadComments() {
+    setState(() {
+      futureComments = APIService.fetchComments(widget.postId);
+    });
   }
 
   @override
@@ -58,7 +54,7 @@ class _CommentListWidgetState extends State<CommentListWidget> {
             return const Center(child: Text('Chưa có bình luận nào'));
           }
 
-          final comments = snapshot.data!;
+          final comments = snapshot.data ?? [];
 
           return Column(
             children: comments.map((c) {
@@ -121,16 +117,38 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                                 Row(
                                   children: [
                                     TextButton(
-                                      onPressed: () async {
-                                        await APIService.likeComment(
-                                          postId: widget.postId,
-                                          commentId: c.id,
-                                        );
+                                      onPressed: c.isLiking
+                                          ? null
+                                          : () async {
+                                              setState(() => c.isLiking = true);
 
-                                        setState(() {
-                                          c.likeCount++; 
-                                        });
-                                      },
+                                              try {
+                                                await APIService.likeComment(
+                                                  postId: widget.postId,
+                                                  commentId: c.id,
+                                                );
+
+                                                if (!mounted) return;
+
+                                                setState(() {
+                                                  c.likeCount++;
+                                                });
+                                              } catch (e) {
+                                                if (!mounted) return;
+
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(e.toString()),
+                                                  ),
+                                                );
+                                              } finally {
+                                                if (mounted) {
+                                                  setState(
+                                                      () => c.isLiking = false);
+                                                }
+                                              }
+                                            },
                                       style: TextButton.styleFrom(
                                         padding: EdgeInsets.zero,
                                         minimumSize: const Size(0, 0),
@@ -139,18 +157,23 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                                       ),
                                       child: Row(
                                         children: [
-                                          const Icon(
+                                          Icon(
                                             Icons.thumb_up_alt_outlined,
                                             size: 16,
-                                            color: Colors.black54,
+                                            color: c.isLiking
+                                                ? Colors.grey
+                                                : Colors.black54,
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
                                             c.likeCount > 0
                                                 ? 'Thích (${c.likeCount})'
                                                 : 'Thích',
-                                            style: const TextStyle(
-                                                color: Colors.black54),
+                                            style: TextStyle(
+                                              color: c.isLiking
+                                                  ? Colors.grey
+                                                  : Colors.black54,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -187,6 +210,11 @@ class _CommentListWidgetState extends State<CommentListWidget> {
                             isInline: true,
                             onCancelReply: () {
                               widget.onReply(null);
+                            },
+                            onCommentSuccess: () {
+                              if (!mounted) return;
+                              widget.onReply(null);
+                              loadComments();
                             },
                           ),
                         ),

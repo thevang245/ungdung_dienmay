@@ -48,7 +48,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void initState() {
     super.initState();
-    _loadAddress();
+   _loadAddress();
   }
 
   @override
@@ -69,14 +69,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Địa chỉ giao hàng
+          
             GestureDetector(
               onTap: () {
-                Navigator.push(
+                final result = Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EditAddressScreen()),
                 );
+                if(result == true) {
+                  _loadAddress();
+                }
               },
+              
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 padding: const EdgeInsets.all(8),
@@ -279,7 +283,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
               await LocalCartService.clearCart();
 
-              Navigator.pop(context);
+              Navigator.pop(context,true);
             } catch (e) {
               if (!context.mounted) return;
 

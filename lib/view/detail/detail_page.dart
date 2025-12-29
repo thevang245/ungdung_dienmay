@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_application_1/models/category_model.dart';
@@ -22,7 +22,7 @@ import 'package:flutter_application_1/view/until/technicalspec_detail.dart';
 import 'package:flutter_application_1/view/until/until.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:html/parser.dart'; // Dùng để parse chuỗi HTML
+import 'package:html/parser.dart'; 
 import 'package:share_plus/share_plus.dart';
 
 class DetailPage extends StatefulWidget {
@@ -56,6 +56,8 @@ class DetailPageState extends State<DetailPage> {
 
   late String moduleType;
   List<dynamic> _productsRelated = [];
+
+  GlobalKey<CommentListWidgetState> _commentlistkey = GlobalKey<CommentListWidgetState>();
 
   static String getModuleNameFromCategoryId(int categoryId) {
     if (categoryModules.containsKey(categoryId)) {
@@ -300,6 +302,7 @@ class DetailPageState extends State<DetailPage> {
                             ),
                           ),
                           CommentListWidget(
+                            key: _commentlistkey,
                             onReply: onReplyPressed,
                             replyToCommentId: replyToCommentId,
                             postId: int.tryParse(widget.productId) ?? 0,
@@ -309,6 +312,10 @@ class DetailPageState extends State<DetailPage> {
                               onCancelReply: clearReply,
                               parentCommentId: replyToCommentId,
                               idPart: widget.productId,
+                              onCommentSuccess: () {
+                                _commentlistkey.currentState?.loadComments();
+                                clearReply();
+                              },
                             )
                         ],
                       ),

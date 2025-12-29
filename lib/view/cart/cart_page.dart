@@ -220,13 +220,16 @@ class CartPageState extends State<CartPage> {
                     isOrderEnabled: hasSelectedItems,
                     tongThanhToan: tongThanhToan,
                     onOrderPressed: () async {
-                      Navigator.push(
+                      final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CheckoutPage(
                                 item: selectedItems,
                                 totalAmount: tongThanhToan),
                           ));
+                          if(result == true)  {
+                            loadCartItems();
+                          }
                     },
                   ),
                 ),

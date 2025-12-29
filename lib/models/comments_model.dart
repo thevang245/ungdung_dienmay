@@ -4,9 +4,10 @@ class Comment {
   final String avatar;
   final String content;
   final DateTime time;
+bool isLiking = false;
 
-  final int rating;        // số sao (comment cha)
-  int likeCount;           // 👈 số lượt thích (có thể tăng giảm)
+  final int rating;        
+  int likeCount;           
   final List<Comment> replies;
 
   Comment({

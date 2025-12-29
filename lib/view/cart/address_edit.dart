@@ -19,7 +19,9 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAddress();
+    setState(() {
+      _loadAddress();
+    });
   }
 
   Future<void> _loadAddress() async {
@@ -76,7 +78,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
               ),
               TextFormField(
                 controller: _districtController,
-                decoration: const InputDecoration(labelText: "Quận/Huyện"),
+                decoration: const InputDecoration(labelText: "Phường/Xã"),
               ),
               TextFormField(
                 controller: _streetController,
@@ -89,7 +91,6 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // 🔹 Lưu SharedPreferences
                       await AddressStorage.save(
                         name: _nameController.text,
                         phone: _phoneController.text,
@@ -106,7 +107,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                           "${_cityController.text}\n"
                           "${_emailController.text}";
 
-                      Navigator.pop(context, fullAddress);
+                      Navigator.pop(context,true);
                     }
                   },
                   style: ElevatedButton.styleFrom(

@@ -331,22 +331,23 @@ class APIService {
     }
   }
 
-///// API COMMMENTS
-  static Future<String> _getAntiBotToken() async {
-    print('➡️ [PRECHECK] Gọi recapcha.precheck');
+  ///// API COMMMENTS
+  static Future<Map<String, dynamic>> precheckComment({
+    int? answer,
+  }) async {
+    final body = <String, String>{
+      'action': 'comment',
+      'hasread': '1',
+    };
+
+    if (answer != null) {
+      body['answer'] = answer.toString();
+    }
 
     final res = await http.post(
-      Uri.parse(
-        '${baseUrl}/ww1/recapcha.precheck.ashx',
-      ),
-      body: {
-        'action': 'comment',
-        'hasread': '1',
-      },
+      Uri.parse('$baseUrl/ww1/recapcha.precheck.ashx'),
+      body: body,
     );
-
-    print('statusCode = ${res.statusCode}');
-    print('body = ${res.body}');
 
     final data = jsonDecode(res.body);
 
@@ -354,16 +355,40 @@ class APIService {
       throw Exception('Precheck trả về dữ liệu không hợp lệ');
     }
 
-    if (data[0]['maloi'] != '0') {
-      throw Exception(
-        'Precheck fail: ${data[0]['ThongBao'] ?? 'Unknown error'}',
-      );
+    final item = Map<String, dynamic>.from(data[0]);
+
+    return {
+      'maloi': item['maloi'],
+      'requireCaptcha': item['RequireCaptcha'] == '1',
+      'antiBotToken': item['AntiBotToken']?.toString(),
+      'thongBao': item['ThongBao'],
+      'status': item['status'],
+      'isBlocked': item['isblocked'] == 1,
+    };
+  }
+
+  static Future<Map<String, dynamic>> getCaptchaInfo() async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/ww1/recapcha.ashx'),
+    );
+
+    final data = jsonDecode(res.body);
+
+    if (data is! List || data.isEmpty) {
+      throw Exception('Captcha trả về dữ liệu không hợp lệ');
     }
 
-    final token = data[0]['AntiBotToken'];
-    print('AntiBotToken = $token');
+    final item = data[0];
 
-    return token;
+    if (item['maloi'] != '0') {
+      throw Exception(item['ThongBao'] ?? 'Captcha error');
+    }
+
+    return {
+      'thongBao': item['ThongBao'] ?? 'Bị chặn captcha',
+      'captchaCode': item['CaptchaCode'],
+      'requireCaptcha': item['RequireCaptcha'] == '1',
+    };
   }
 
   static Future<Map<String, dynamic>> sendComments({
@@ -376,18 +401,42 @@ class APIService {
     int? l,
     String hinhdaidien = '/dist/images/user.jpg',
     String aitrain = '',
+    String? antiBotToken,
   }) async {
     try {
-      final antiBotToken = await _getAntiBotToken();
-      print('idcommentparent: $l');
+      String? token = antiBotToken;
 
-      final Map<String, String> body = {
+      /// 🔥 CHỈ precheck khi CHƯA có token
+      if (token == null) {
+        final precheck = await precheckComment();
+
+        if (precheck['requireCaptcha'] == true) {
+          final captcha = await getCaptchaInfo();
+
+          return {
+            'RequireCaptcha': 1,
+            'ThongBao': captcha['thongBao'],
+            'CaptchaCode': captcha['captchaCode'],
+          };
+        }
+
+        token = precheck['antiBotToken'];
+
+        if (token == null || token.isEmpty) {
+          return {
+            'maloi': '-1',
+            'ThongBao': 'AntiBotToken không hợp lệ',
+          };
+        }
+      }
+
+      final body = <String, String>{
         'tenkh': tenkh,
         'txtemail': email,
         'txtdienthoai': sdt,
         'noidungtxt': noidung,
         'id3': hinhdaidien,
-        'AntiBotToken': antiBotToken,
+        'AntiBotToken': token.toString(),
         'aitrain': aitrain,
       };
 
@@ -395,14 +444,11 @@ class APIService {
         body['l'] = l.toString();
         body['id2'] = '0';
       } else if (sosao > 0) {
-        final int star = sosao.round().clamp(1, 5);
-        body['id2'] = star.toString();
+        body['id2'] = sosao.round().clamp(1, 5).toString();
       }
 
       final res = await http.post(
-        Uri.parse(
-          '${baseUrl}/ww1/save.binhluan.ashx?id=$idPart',
-        ),
+        Uri.parse('$baseUrl/ww1/save.binhluan.ashx?id=$idPart'),
         body: body,
       );
 
@@ -411,7 +457,7 @@ class APIService {
         return Map<String, dynamic>.from(data[0]);
       }
 
-      return {'maloi': '-1', 'ThongBao': 'No response'};
+      return {'maloi': '-1', 'ThongBao': 'Không có phản hồi'};
     } catch (e) {
       return {'maloi': '-1', 'ThongBao': e.toString()};
     }
@@ -422,38 +468,50 @@ class APIService {
     required int? commentId,
   }) async {
     try {
-      final antiBotToken = await _getAntiBotToken();
+      final precheck = await precheckComment();
 
-      print('AntiBotToken = $antiBotToken');
-      print('postid = $postId');
-      print('commentID = $commentId');
+      if (precheck['requireCaptcha'] == true) {
+        throw Exception('Cần xác thực captcha trước khi like');
+      }
+
+      final token = precheck['antiBotToken'];
+
+      if (token == null || token.isEmpty) {
+        throw Exception('AntiBotToken không hợp lệ');
+      }
 
       final res = await http.post(
         Uri.parse(
-          '${baseUrl}/ww1/save.binhluan.thich.ashx'
+          '$baseUrl/ww1/save.binhluan.thich.ashx'
           '?id=$postId&id2=$commentId',
         ),
         body: {
-          'AntiBotToken': antiBotToken,
+          'AntiBotToken': token,
         },
       );
 
-      print('statusCode = ${res.statusCode}');
-      print('body = ${res.body}');
+      if (res.statusCode != 200 || res.body.isEmpty) {
+        throw Exception('HTTP error ${res.statusCode}');
+      }
 
-      if (res.statusCode == 200 && res.body.isNotEmpty) {
-        final data = jsonDecode(res.body);
+      final data = jsonDecode(res.body);
 
-       
-        if (data is Map && data['maloi']?.toString() == '1') {
-          print('Like comment thành công');
+      if (data is Map) {
+        if (data['maloi']?.toString() == '1') {
           return;
         }
-
         throw Exception(data['ThongBao'] ?? 'Like thất bại');
       }
 
-      throw Exception('HTTP error ${res.statusCode}');
+      if (data is List && data.isNotEmpty) {
+        final item = data[0];
+        if (item['maloi']?.toString() == '1') {
+          return;
+        }
+        throw Exception(item['ThongBao'] ?? 'Like thất bại');
+      }
+
+      throw Exception('Dữ liệu trả về không hợp lệ');
     } catch (e) {
       print('[LIKE] Lỗi: $e');
       rethrow;
