@@ -81,13 +81,13 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
           label: 'Giỏ hàng',
         ),
-        BottomNavigationBarItem(
-          icon: ImageIcon(
-            currentIndex  == 3 ? AssetImage('asset/usersl.png') : AssetImage('asset/user.png'),
-            size: 24,
-          ),
-          label: 'Tài khoản',
-        ),
+        // BottomNavigationBarItem(
+        //   icon: ImageIcon(
+        //     currentIndex  == 3 ? AssetImage('asset/usersl.png') : AssetImage('asset/user.png'),
+        //     size: 24,
+        //   ),
+        //   label: 'Tài khoản',
+        // ),
       ],
     );
   }

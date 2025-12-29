@@ -156,27 +156,27 @@ class _ItemCartState extends State<ItemCart> {
 
                     const SizedBox(height: 8),
 
-                    // NÚT XÓA SẢN PHẨM
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () async {
-                          await APICartService.removeCartItem(
-                            cartitemCount: widget.cartitemCount,
-                            emailAddress: widget.userId,
-                            productId: '${widget.item.id}',
-                          );
-                          if (widget.OnChanged != null) widget.OnChanged!();
-                        },
-                        child: const Text(
-                          'Xóa sản phẩm',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 13.5,
-                          ),
-                        ),
-                      ),
-                    ),
+                    
+                    // Align(
+                    //   alignment: Alignment.centerRight,
+                    //   child: GestureDetector(
+                    //     onTap: () async {
+                    //       await APICartService.removeCartItem(
+                    //         cartitemCount: widget.cartitemCount,
+                    //         emailAddress: widget.userId,
+                    //         productId: '${widget.item.id}',
+                    //       );
+                    //       if (widget.OnChanged != null) widget.OnChanged!();
+                    //     },
+                    //     child: const Text(
+                    //       'Xóa sản phẩm',
+                    //       style: TextStyle(
+                    //         color: Colors.redAccent,
+                    //         fontSize: 13.5,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
