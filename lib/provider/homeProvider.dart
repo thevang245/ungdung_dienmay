@@ -219,7 +219,9 @@ class HomeProvider extends ChangeNotifier {
       }
 
       categoryName = category;
-      print('📂 Đã chọn danh mục: $categoryName | kiểu: $kieuhienthi');
+      print('Đã chọn danh mục: $categoryName kiểu: $kieuhienthi');
+      isLoading = false;
+      notifyListeners();
     }
   }
 

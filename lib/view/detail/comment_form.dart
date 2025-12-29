@@ -196,6 +196,7 @@ class _CommentFormState extends State<CommentForm> {
                                   context: context,
                                   message: result['ThongBao'],
                                   captchaCode: result['CaptchaCode'],
+                                  action: 'comment'
                                 );
 
                                 if (token == null) return;

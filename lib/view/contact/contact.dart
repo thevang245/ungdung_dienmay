@@ -1,19 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/services/api_service.dart';
+import 'package:flutter_application_1/view/until/until.dart';
 import 'package:flutter_application_1/widgets/button_widget.dart';
 import 'package:flutter_application_1/widgets/input_widget.dart';
 
-class ContactForm extends StatelessWidget {
+class ContactForm extends StatefulWidget {
   const ContactForm({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final _fullNameFocus = FocusNode();
-    final _emailFocus = FocusNode();
-    final _addressFocus = FocusNode();
-    final _phoneFocus = FocusNode();
-    final _codeFocus = FocusNode();
-    final _textFocus = FocusNode();
+  State<ContactForm> createState() => _ContactFormState();
+}
 
+class _ContactFormState extends State<ContactForm> {
+  final _fullNameFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _addressFocus = FocusNode();
+  final _phoneFocus = FocusNode();
+  final _codeFocus = FocusNode();
+  final _textFocus = FocusNode();
+
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _contentCtrl = TextEditingController();
+
+  bool _isSubmitting = false;
+  String? _antiBotToken;
+
+  Future<void> _submitContact() async {
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final res = await APIService.sendLienHe(
+        linkLienHe: 'https://vangtran.125.atoz.vn/lien-he-60761',
+        customerName: _nameCtrl.text.trim(),
+        emailAddress: _emailCtrl.text.trim(),
+        address: _addressCtrl.text.trim(),
+        tel: _phoneCtrl.text.trim(),
+        notice: _contentCtrl.text.trim(),
+        antiBotToken: _antiBotToken,
+      );
+
+      if (res['RequireCaptcha'] == 1) {
+        final token = await showCaptchaDialog(
+            context: context,
+            message: res['ThongBao'] ?? 'Vui lòng xác minh',
+            captchaCode: res['CaptchaCode'],
+            action: 'lienhe');
+
+        if (token != null) {
+          _antiBotToken = token;
+          await _submitContact();
+        }
+        return;
+      }
+
+      if (res['maloi'] == '1') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['ThongBao'] ?? 'Gửi thành công'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+      
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(res['ThongBao'] ?? 'Gửi thất bại'),
+              backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth * 0.037;
     return Scaffold(
@@ -44,16 +111,19 @@ class ContactForm extends StatelessWidget {
                     Icons.language, 'Website:', 'TuyenNhanSu.com', fontSize),
                 SizedBox(height: 20),
                 CustomTextField(
+                    controller: _nameCtrl,
                     focusNode: _fullNameFocus,
                     nextFocusNode: _emailFocus,
                     label: 'Họ tên'),
                 SizedBox(height: 10),
                 CustomTextField(
+                    controller: _emailCtrl,
                     focusNode: _emailFocus,
                     nextFocusNode: _addressFocus,
                     label: 'Địa chỉ email'),
                 SizedBox(height: 10),
                 CustomTextField(
+                    controller: _addressCtrl,
                     focusNode: _addressFocus,
                     nextFocusNode: _phoneFocus,
                     label: 'Địa chỉ'),
@@ -63,6 +133,7 @@ class ContactForm extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: CustomTextField(
+                          controller: _phoneCtrl,
                           focusNode: _phoneFocus,
                           nextFocusNode: _codeFocus,
                           label: 'Điện thoại'),
@@ -79,13 +150,14 @@ class ContactForm extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 CustomTextField(
-                    focusNode: _textFocus, label: 'Nội dung', maxline: 3),
+                    controller: _contentCtrl,
+                    focusNode: _textFocus,
+                    label: 'Nội dung',
+                    maxline: 3),
                 SizedBox(height: 30),
                 CustomButton(
-                  text: 'Gửi đi',
-                  onPressed: () {
-                    // Xử lý gửi thông tin ở đây
-                  },
+                  text: _isSubmitting ? 'Đang gửi...' : 'Gửi đi',
+                  onPressed: _isSubmitting ? null : _submitContact,
                 ),
               ],
             ),

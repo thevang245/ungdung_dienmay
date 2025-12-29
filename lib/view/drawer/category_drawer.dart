@@ -11,7 +11,7 @@ class DanhMucDrawer extends StatelessWidget {
 
   Future<List<dynamic>> fetchDanhMuc() async {
     final String url =
-        '${APIService.baseUrl}/ww2/app.menu.dautrang.${APIService.language}';
+        '${APIService.baseUrl}/ww2/mobile.menu.${APIService.language}';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {

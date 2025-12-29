@@ -30,8 +30,10 @@ class Homecontent extends StatelessWidget {
     final crossAxisCount = singleColumnCategories.contains(categoryId) ? 1 : 2;
     final modules = categoryModules[categoryId];
     final isTinTuc = modules != null && modules[1] == 'tintuc';
+    final isLienhe = modules != null && modules[1] == 'Lienhe';
     final labelWidth = 190.0;
     final screenWidth = MediaQuery.of(context).size.width;
+   
 
     Widget buildEmptyMessage() {
       return const Center(
@@ -118,12 +120,15 @@ class Homecontent extends StatelessWidget {
 
     Widget bodyContent;
 
-    if (isLoading) {
+    if (categoryId == 60761|| isLienhe) {
+      bodyContent = ContactForm();
+     
+    }
+    else if (isLoading) {
       bodyContent = const Center(
           child: CircularProgressIndicator(color: Color(0xff0066FF)));
-    } else if (categoryId == 35028) {
-      bodyContent = ContactForm();
-    } else if (products.isEmpty) {
+    }
+     else if (products.isEmpty) {
       bodyContent = buildEmptyMessage();
     } else if (categoryId == 0) {
       bodyContent = SafeArea(
@@ -163,7 +168,8 @@ class Homecontent extends StatelessWidget {
         onRefresh: () async => context.read<HomeProvider>().fetchProducts(),
         child: buildGroupedProducts(),
       );
-    } else {
+    }
+     else {
       final visibleProducts = products
           .where((p) => categoryId == 35004 || hasValidImage(p))
           .toList();
@@ -193,7 +199,7 @@ class Homecontent extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8),
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    !isLoading ? categoryName : 'Đang tải...',
+                    isLienhe ? categoryName : (!isLoading ? categoryName : 'Đang tải...'),
                     style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -232,6 +238,8 @@ class Homecontent extends StatelessWidget {
                       },
                     ),
                   ),
+
+            
               ],
             )
           : null,

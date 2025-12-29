@@ -170,6 +170,7 @@ Future<String?> showCaptchaDialog({
   required BuildContext context,
   required String message,
   required String captchaCode,
+  required String action,
 }) async {
   final controller = TextEditingController();
 
@@ -297,7 +298,7 @@ Future<String?> showCaptchaDialog({
               final answer = int.tryParse(controller.text.trim());
               if (answer == null) return;
 
-              final verify = await APIService.precheckComment(answer: answer);
+              final verify = await APIService.precheckComment(answer: answer,action: action);
 
               if (verify['antiBotToken'] != null) {
                 Navigator.pop(ctx, verify['antiBotToken']);
@@ -316,3 +317,4 @@ Future<String?> showCaptchaDialog({
     },
   );
 }
+
