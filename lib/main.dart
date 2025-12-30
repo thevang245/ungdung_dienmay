@@ -5,6 +5,7 @@ import 'package:flutter_application_1/provider/detailProvider.dart';
 import 'package:flutter_application_1/provider/homeProvider.dart';
 import 'package:flutter_application_1/provider/pageStateProvider.dart';
 import 'package:flutter_application_1/provider/profileProvider.dart';
+import 'package:flutter_application_1/view/contact/contact.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/view/allpage.dart';
 
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const PageAll(),
+      home: PageAll(),
     );
   }
 }

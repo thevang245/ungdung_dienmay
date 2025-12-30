@@ -27,55 +27,21 @@ class _ContactFormState extends State<ContactForm> {
 
   bool _isSubmitting = false;
   String? _antiBotToken;
-
-  Future<void> _submitContact() async {
-    if (_isSubmitting) return;
-
-    setState(() => _isSubmitting = true);
-
-    try {
-      final res = await APIService.sendLienHe(
-        linkLienHe: 'https://vangtran.125.atoz.vn/lien-he-60761',
-        customerName: _nameCtrl.text.trim(),
-        emailAddress: _emailCtrl.text.trim(),
-        address: _addressCtrl.text.trim(),
-        tel: _phoneCtrl.text.trim(),
-        notice: _contentCtrl.text.trim(),
-        antiBotToken: _antiBotToken,
+  void _handleResult(Map<String, dynamic> result) {
+    if (result['maloi'] == '1') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['ThongBao'] ?? 'Gửi thành công'),
+          backgroundColor: Colors.green,
+        ),
       );
-
-      if (res['RequireCaptcha'] == 1) {
-        final token = await showCaptchaDialog(
-            context: context,
-            message: res['ThongBao'] ?? 'Vui lòng xác minh',
-            captchaCode: res['CaptchaCode'],
-            action: 'lienhe');
-
-        if (token != null) {
-          _antiBotToken = token;
-          await _submitContact();
-        }
-        return;
-      }
-
-      if (res['maloi'] == '1') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['ThongBao'] ?? 'Gửi thành công'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-      
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(res['ThongBao'] ?? 'Gửi thất bại'),
-              backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      setState(() => _isSubmitting = false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['ThongBao'] ?? 'Gửi thất bại'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -157,7 +123,74 @@ class _ContactFormState extends State<ContactForm> {
                 SizedBox(height: 30),
                 CustomButton(
                   text: _isSubmitting ? 'Đang gửi...' : 'Gửi đi',
-                  onPressed: _isSubmitting ? null : _submitContact,
+                  onPressed: _isSubmitting
+                      ? null
+                      : () async {
+                          if (!mounted) return;
+
+                          setState(() => _isSubmitting = true);
+
+                          try {
+                            // Bước 1: Gửi request ban đầu với antiBotToken (nếu có)
+                            final result = await APIService.sendLienHe(
+                              linkLienHe: '${APIService.baseUrl}/lien-he-60761',
+                              customerName: _nameCtrl.text,
+                              emailAddress: _emailCtrl.text,
+                              address: _addressCtrl.text,
+                              tel: _phoneCtrl.text,
+                              notice: _contentCtrl.text,
+                              antiBotToken: _antiBotToken,
+                            );
+
+                            if (!mounted) return;
+
+                            // Bước 2: Kiểm tra xem có yêu cầu CAPTCHA hay không
+                            final requireCaptcha =
+                                result['RequireCaptcha'] == 1 ||
+                                    result['RequireCaptcha'] == '1' ||
+                                    result['RequireCaptcha'] == true;
+
+                            if (requireCaptcha) {
+                              // Bước 3: Hiển thị CAPTCHA dialog để người dùng xác minh
+                              final token = await showCaptchaDialog(
+                                context: context,
+                                message:
+                                    result['ThongBao'] ?? 'Vui lòng xác minh',
+                                captchaCode: result['CaptchaCode'],
+                                action: 'lienhe',
+                              );
+
+                              if (token == null)
+                                return; // Nếu không có token CAPTCHA, không gửi lại dữ liệu
+
+                              // Bước 4: Gửi lại yêu cầu với antiBotToken mới sau khi CAPTCHA xác minh thành công
+                              final retry = await APIService.sendLienHe(
+                                linkLienHe:
+                                    '${APIService.baseUrl}/lien-he-60761',
+                                customerName: _nameCtrl.text,
+                                emailAddress: _emailCtrl.text,
+                                address: _addressCtrl.text,
+                                tel: _phoneCtrl.text,
+                                notice: _contentCtrl.text,
+                                antiBotToken:
+                                    token, // Gửi lại với token CAPTCHA mới
+                              );
+
+                              if (!mounted) return;
+
+                              // Xử lý kết quả trả về sau khi gửi lại
+                              _handleResult(retry);
+                              return;
+                            }
+
+                            // Nếu không yêu cầu CAPTCHA, xử lý kết quả trả về ban đầu
+                            _handleResult(result);
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isSubmitting = false);
+                            }
+                          }
+                        },
                 ),
               ],
             ),

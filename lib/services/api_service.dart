@@ -1,11 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/comments_model.dart';
-import 'package:flutter_application_1/models/product_model.dart';
-import 'package:flutter_application_1/view/until/until.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class APIService {
   static const String baseUrl = 'https://vangtran.125.atoz.vn';
@@ -332,9 +328,8 @@ class APIService {
   }
 
   ///// API COMMMENTS
-  static Future<Map<String, dynamic>> precheckComment({
-    int? answer,required String action
-  }) async {
+  static Future<Map<String, dynamic>> precheckComment(
+      {int? answer, required String action}) async {
     final body = <String, String>{
       'action': action,
       'hasread': '1',
@@ -519,115 +514,117 @@ class APIService {
   }
 
   static Future<Map<String, dynamic>> sendLienHe({
-  required String linkLienHe,
-  String? khuVuc,
-  String? kieuLienLac,
-  String? idBaiViet,
-  String customerName = '',
-  String emailAddress = '',
-  String address = '',
-  String tel = '',
-  String notice = '',
-  String dynamicSummary = '',
-  String recaptchaToken = '',
-  String? antiBotToken,
-}) async {
-  try {
-    String? token = antiBotToken;
+    required String linkLienHe,
+    String? khuVuc,
+    String? kieuLienLac,
+    String? idBaiViet,
+    String customerName = '',
+    String emailAddress = '',
+    String address = '',
+    String tel = '',
+    String notice = '',
+    String dynamicSummary = '',
+    String recaptchaToken = '',
+    String? antiBotToken,
+  }) async {
+    try {
+      String? token = antiBotToken;
 
-    debugPrint('[LIENHE] Bắt đầu gửi liên hệ');
-    debugPrint('LinkLienHe: $linkLienHe');
+      debugPrint('[LIENHE] Bắt đầu gửi liên hệ');
+      debugPrint('LinkLienHe: $linkLienHe');
 
- 
-    if (token == null) {
-      debugPrint('[LIENHE] Precheck AntiBot...');
+      // Kiểm tra nếu chưa có AntiBotToken
+      if (token == null) {
+        debugPrint('[LIENHE] Precheck AntiBot...');
 
-      final precheck = await precheckComment(action: 'lienhe');
-      debugPrint('[LIENHE] Precheck response: $precheck');
+        final precheck = await precheckComment(action: 'lienhe');
+        debugPrint('[LIENHE] Precheck response: $precheck');
 
-      if (precheck['requireCaptcha'] == true) {
-        final captcha = await getCaptchaInfo();
-        debugPrint('[LIENHE] Bị yêu cầu captcha');
+        // Nếu yêu cầu captcha, thực hiện xác minh captcha
+        if (precheck['requireCaptcha'] == true) {
+          final captcha = await getCaptchaInfo();
+          debugPrint('[LIENHE] Bị yêu cầu captcha');
 
-        return {
-          'RequireCaptcha': 1,
-          'ThongBao': captcha['thongBao'],
-          'CaptchaCode': captcha['captchaCode'],
-        };
+          return {
+            'RequireCaptcha': 1,
+            'ThongBao': captcha['thongBao'],
+            'CaptchaCode': captcha['captchaCode'],
+          };
+        }
+
+        // Nếu không yêu cầu captcha, gán token từ precheck
+        token = precheck['antiBotToken'];
+        if (token == null || token.isEmpty) {
+          debugPrint('[LIENHE] AntiBotToken không hợp lệ');
+          return {
+            'maloi': '-1',
+            'ThongBao': 'AntiBotToken không hợp lệ',
+          };
+        }
       }
 
-      token = precheck['antiBotToken'];
-      if (token == null || token.isEmpty) {
-        debugPrint('[LIENHE] AntiBotToken không hợp lệ');
-        return {
-          'maloi': '-1',
-          'ThongBao': 'AntiBotToken không hợp lệ',
-        };
-      }
-    }
+      // Tạo body gửi đi
+      final body = <String, String>{
+        'LinkLienHe': linkLienHe,
+        'submitted': '1',
+        'hasread': '1',
+        'action': 'lienhe',
+        'AntiBotToken': token, // Gửi token vào request
+        'CustomerName': customerName,
+        'EmailAddress': emailAddress,
+        'Address': address,
+        'Tel': tel,
+        'Notice': notice,
+        'DynamicSummary': dynamicSummary,
+      };
 
-    final body = <String, String>{
-      'LinkLienHe': linkLienHe,
-      'submitted': '1',
-      'hasread': '1',
-      'action': 'lienhe',
-      'AntiBotToken': token,
-      'CustomerName': customerName,
-      'EmailAddress': emailAddress,
-      'Address': address,
-      'Tel': tel,
-      'Notice': notice,
-      'DynamicSummary': dynamicSummary,
-    };
-
-    
-    if (khuVuc != null && khuVuc.isNotEmpty) {
-      body['KhuVucKhuVuc'] = khuVuc;
-    }
-
-    if (kieuLienLac != null && kieuLienLac.isNotEmpty) {
-      body['KieuLienLac'] = kieuLienLac;
-    }
-
-    if (idBaiViet != null && idBaiViet.isNotEmpty) {
-      body['IDBaiViet'] = idBaiViet;
-    }
-
-    if (recaptchaToken.isNotEmpty) {
-      body['recaptchaToken'] = recaptchaToken;
-    }
-
-    debugPrint('[LIENHE] Request body: $body');
-
-    final res = await http.post(
-      Uri.parse('$baseUrl/ww1/save.lienhe.ashx'),
-      body: body,
-    );
-
-    debugPrint(' [LIENHE] HTTP ${res.statusCode}');
-    debugPrint(' [LIENHE] Response raw: ${res.body}');
-
-    final data = jsonDecode(res.body);
-
-    if (data is List && data.isNotEmpty) {
-      final result = Map<String, dynamic>.from(data[0]);
-
-      if (result['maloi'] == '1') {
-        debugPrint('[LIENHE] GỬI THÀNH CÔNG: ${result['ThongBao']}');
-      } else {
-        debugPrint('[LIENHE] GỬI THẤT BẠI: ${result['ThongBao']}');
+      if (khuVuc != null && khuVuc.isNotEmpty) {
+        body['KhuVucKhuVuc'] = khuVuc;
       }
 
-      return result;
-    }
+      if (kieuLienLac != null && kieuLienLac.isNotEmpty) {
+        body['KieuLienLac'] = kieuLienLac;
+      }
 
-    debugPrint('[LIENHE] Không có dữ liệu trả về');
-    return {'maloi': '-1', 'ThongBao': 'Không có phản hồi'};
-  } catch (e, stack) {
-    debugPrint(' [LIENHE] EXCEPTION: $e');
-    debugPrint(stack.toString());
-    return {'maloi': '-1', 'ThongBao': e.toString()};
+      if (idBaiViet != null && idBaiViet.isNotEmpty) {
+        body['IDBaiViet'] = idBaiViet;
+      }
+
+      if (recaptchaToken.isNotEmpty) {
+        body['recaptchaToken'] =
+            recaptchaToken; // Thêm token captcha vào request
+      }
+
+      debugPrint('[LIENHE] Request body: $body');
+
+      final res = await http.post(
+        Uri.parse('$baseUrl/ww1/save.lienhe.ashx'),
+        body: body,
+      );
+
+      debugPrint(' [LIENHE] HTTP ${res.statusCode}');
+      debugPrint(' [LIENHE] Response raw: ${res.body}');
+
+      final data = jsonDecode(res.body);
+
+      if (data is List && data.isNotEmpty) {
+        final result = Map<String, dynamic>.from(data[0]);
+
+        if (result['maloi'] == '1') {
+          debugPrint('[LIENHE] GỬI THÀNH CÔNG: ${result['ThongBao']}');
+        } else {
+          debugPrint('[LIENHE] GỬI THẤT BẠI: ${result['ThongBao']}');
+        }
+
+        return result;
+      }
+
+      debugPrint('[LIENHE] Không có dữ liệu trả về');
+      return {'maloi': '-1', 'ThongBao': 'Không có phản hồi'};
+    } catch (e, stack) {
+      debugPrint(' [LIENHE] EXCEPTION: $e');
+      debugPrint(stack.toString());
+      return {'maloi': '-1', 'ThongBao': e.toString()};
+    }
   }
-}
-
 }
