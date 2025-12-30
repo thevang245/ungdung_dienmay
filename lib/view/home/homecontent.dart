@@ -33,6 +33,10 @@ class Homecontent extends StatelessWidget {
     final isLienhe = modules != null && modules[1] == 'Lienhe';
     final labelWidth = 190.0;
     final screenWidth = MediaQuery.of(context).size.width;
+    print('islienhe: ${isLienhe}');
+
+    print('isTinTuc: ${isTinTuc}');
+
    
 
     Widget buildEmptyMessage() {
@@ -120,7 +124,7 @@ class Homecontent extends StatelessWidget {
 
     Widget bodyContent;
 
-    if (categoryId == 60761|| isLienhe) {
+    if (categoryId == 60761) {
       bodyContent = ContactForm();
      
     }
@@ -209,7 +213,8 @@ class Homecontent extends StatelessWidget {
               ),
               iconTheme: const IconThemeData(color: Colors.black),
               actions: [
-                if (!isTinTuc && categoryId != 0 && categoryId != 35001)
+                
+                if (!isTinTuc && categoryId != 60761)
                   Container(
                     margin: const EdgeInsets.only(right: 8),
                     width: 35,
